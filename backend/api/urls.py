@@ -1,0 +1,17 @@
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from . import views
+
+router = DefaultRouter()
+router.register(r'products', views.ProductViewSet)
+router.register(r'orders', views.OrderViewSet)
+router.register(r'catering-services', views.CateringServiceViewSet)
+router.register(r'reviews', views.ProductReviewViewSet)
+router.register(r'wishlist', views.WishlistViewSet)
+
+urlpatterns = [
+    path('', include(router.urls)),
+    path('settings/', views.site_settings, name='site-settings'),
+    path('contact/', views.contact, name='contact'),
+    path('stripe-webhook/', views.stripe_webhook, name='stripe-webhook'),
+] 

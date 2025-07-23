@@ -1,0 +1,371 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | CHOPHOUSE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'output.css' %}" rel="stylesheet">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #ed7516 0%, #f1943d 50%, #f6bb77 100%);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #fef7ee 0%, #fdedd6 100%);
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ed7516 0%, #f1943d 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(237, 117, 22, 0.4);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #ed7516;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #ed7516;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-outline:hover {
+            background: #ed7516;
+            color: white;
+            transform: translateY(-1px);
+        }
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans" x-data="{ sidebarOpen: false }">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-display font-bold text-primary-600">CHOPHOUSE</h1>
+                        <span class="text-sm text-gray-500">Admin Dashboard</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="{% url 'dashboard' %}" class="text-primary-600 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+                        <a href="{% url 'staff_management' %}" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Staff Management</a>
+                        <a href="/" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Main Site</a>
+                    </div>
+                </div>
+
+                <!-- User Menu & Mobile Menu Button -->
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:block">
+                        <span class="text-gray-700 text-sm">Welcome, {{ user.profile.full_name|default:user.email|title }}</span>
+                    </div>
+                    <a href="{% url 'logout' %}" class="btn-outline hidden md:inline-block">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                    <!-- Mobile menu button -->
+                    <button @click="sidebarOpen = !sidebarOpen" class="md:hidden p-2 text-gray-700 hover:text-primary-600 transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Sidebar -->
+    <div x-show="sidebarOpen" x-transition class="md:hidden fixed inset-0 z-40">
+        <div class="fixed inset-0 bg-gray-600 bg-opacity-75" @click="sidebarOpen = false"></div>
+        <div class="relative flex-1 flex flex-col max-w-xs w-full bg-white">
+            <div class="absolute top-0 right-0 -mr-12 pt-2">
+                <button @click="sidebarOpen = false" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                    <i class="fas fa-times text-white"></i>
+                </button>
+            </div>
+            <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+                <div class="flex-shrink-0 flex items-center px-4">
+                    <h1 class="text-xl font-display font-bold text-primary-600">CHOPHOUSE</h1>
+                </div>
+                <nav class="mt-5 px-2 space-y-1">
+                    <a href="{% url 'dashboard' %}" class="bg-primary-100 text-primary-600 group flex items-center px-2 py-2 text-base font-medium rounded-md">
+                        <i class="fas fa-tachometer-alt mr-4"></i>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'staff_management' %}" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md">
+                        <i class="fas fa-users mr-4"></i>
+                        Staff Management
+                    </a>
+                    <a href="/" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md">
+                        <i class="fas fa-home mr-4"></i>
+                        Main Site
+                    </a>
+                </nav>
+            </div>
+            <div class="flex-shrink-0 flex border-t border-gray-200 p-4">
+                <div class="flex items-center">
+                    <div>
+                        <p class="text-base font-medium text-gray-700">{{ user.profile.full_name|default:user.email|title }}</p>
+                        <a href="{% url 'logout' %}" class="text-sm font-medium text-primary-600 hover:text-primary-500">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="min-h-screen bg-gray-50">
+        <!-- Hero Section -->
+        <section class="hero-gradient py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h1 class="text-4xl md:text-5xl font-display font-bold text-white text-shadow mb-4">
+                        Welcome to <span class="text-primary-200">Admin Dashboard</span>
+                    </h1>
+                    <p class="text-xl text-white text-shadow mb-8 max-w-3xl mx-auto">
+                        Manage your restaurant operations, staff, and business analytics
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="{% url 'staff_management' %}" class="btn-primary text-lg">
+                            <i class="fas fa-users mr-2"></i>
+                            Manage Staff
+                        </a>
+                        <a href="/" class="btn-outline text-lg bg-white bg-opacity-90">
+                            <i class="fas fa-external-link-alt mr-2"></i>
+                            View Main Site
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section class="py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-4">Business Analytics</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Monitor your restaurant's performance and key metrics
+                    </p>
+                </div>
+
+                <!-- Analytics Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                    <!-- Total Revenue -->
+                    <div class="card p-6 text-center">
+                        <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-money-bill-wave text-2xl text-primary-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">
+                            {% if is_owner %}
+                                ₦{{ total_revenue|default:"0" }}
+                            {% else %}
+                                ₦{{ total_revenue|default:"0" }}
+                            {% endif %}
+                        </h3>
+                        <p class="text-gray-600 mb-2">Total Revenue</p>
+                        <span class="text-green-600 text-sm font-semibold">All Time</span>
+                    </div>
+
+                    <!-- Orders -->
+                    <div class="card p-6 text-center">
+                        <div class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-shopping-bag text-2xl text-secondary-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ total_orders|default:"0" }}</h3>
+                        <p class="text-gray-600 mb-2">Total Orders</p>
+                        <span class="text-green-600 text-sm font-semibold">All Time</span>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    <div class="card p-6 text-center">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-clock text-2xl text-blue-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ pending_orders|default:"0" }}</h3>
+                        <p class="text-gray-600 mb-2">Pending Orders</p>
+                        <span class="text-orange-600 text-sm font-semibold">Awaiting Processing</span>
+                    </div>
+
+                    <!-- Staff -->
+                    <div class="card p-6 text-center">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-tie text-2xl text-purple-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ staff_count }}</h3>
+                        <p class="text-gray-600 mb-2">Staff Members</p>
+                        <span class="text-blue-600 text-sm font-semibold">Currently Active</span>
+                    </div>
+                </div>
+
+                <!-- Recent Orders Section -->
+                {% if is_owner %}
+                <div class="card p-8 mb-8">
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">Recent Orders</h3>
+                    {% if recent_orders %}
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for order in recent_orders %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ order.id }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ order.customer_name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₦{{ order.total_amount }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                                {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800
+                                                {% elif order.status == 'preparing' %}bg-orange-100 text-orange-800
+                                                {% elif order.status == 'ready' %}bg-green-100 text-green-800
+                                                {% elif order.status == 'delivered' %}bg-gray-100 text-gray-800
+                                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                                {{ order.status|title }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.created_at|date:"M d, Y" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <a href="/admin/api/order/" class="btn-primary">
+                                <i class="fas fa-eye mr-2"></i>
+                                View All Orders
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-shopping-bag text-4xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500">No orders yet. Orders will appear here once customers start placing them.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                    <!-- Revenue Chart -->
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-4">Revenue Trend</h3>
+                        <div class="h-64 bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-chart-line text-4xl text-primary-400 mb-4"></i>
+                                <p class="text-gray-600">Revenue visualization chart</p>
+                                <p class="text-sm text-gray-500 mt-2">Monthly revenue tracking</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orders Chart -->
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-4">Order Statistics</h3>
+                        <div class="h-64 bg-gradient-to-br from-secondary-50 to-secondary-100 rounded-lg flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-chart-bar text-4xl text-secondary-400 mb-4"></i>
+                                <p class="text-gray-600">Order analytics chart</p>
+                                <p class="text-sm text-gray-500 mt-2">Daily order tracking</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card p-8">
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">Quick Actions</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <a href="{% url 'staff_management' %}" class="group">
+                            <div class="p-6 border-2 border-gray-200 rounded-lg hover:border-primary-300 transition-colors">
+                                <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-200 transition-colors">
+                                    <i class="fas fa-user-plus text-xl text-primary-600"></i>
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Add Staff Member</h4>
+                                <p class="text-gray-600 text-sm">Invite new staff members to your team</p>
+                            </div>
+                        </a>
+                        
+                        <a href="/" class="group">
+                            <div class="p-6 border-2 border-gray-200 rounded-lg hover:border-primary-300 transition-colors">
+                                <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-secondary-200 transition-colors">
+                                    <i class="fas fa-eye text-xl text-secondary-600"></i>
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">View Main Site</h4>
+                                <p class="text-gray-600 text-sm">See how customers view your website</p>
+                            </div>
+                        </a>
+                        
+                        <a href="#" class="group">
+                            <div class="p-6 border-2 border-gray-200 rounded-lg hover:border-primary-300 transition-colors">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
+                                    <i class="fas fa-cog text-xl text-blue-600"></i>
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Settings</h4>
+                                <p class="text-gray-600 text-sm">Configure your restaurant settings</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Alpine.js data
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('dashboard', () => ({
+                init() {
+                    console.log('Dashboard loaded');
+                }
+            }));
+        });
+    </script>
+</body>
+</html> 

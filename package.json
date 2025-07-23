@@ -1,0 +1,28 @@
+{
+  "name": "chophouse-ecommerce",
+  "version": "1.0.0",
+  "description": "Modern e-commerce website for CHOPHOUSE - Finger foods and catering business",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
+    "build": "npx tailwindcss -i ./src/input.css -o ./dist/output.css --minify",
+    "start": "live-server --port=3000"
+  },
+  "keywords": [
+    "ecommerce",
+    "food",
+    "catering",
+    "finger-foods"
+  ],
+  "author": "CHOPHOUSE",
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^10.4.16",
+    "live-server": "^1.2.2",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0"
+  },
+  "dependencies": {
+    "@stripe/stripe-js": "^2.4.0"
+  }
+}

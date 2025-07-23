@@ -1,0 +1,827 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHOPHOUSE - Premium Finger Foods & Catering</title>
+    <meta name="description" content="CHOPHOUSE offers delicious finger foods, sauced chicken & turkey, yogurt parfaits, drinks, cakes, and event setup services.">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'main.css' %}?v=1.2" rel="stylesheet">
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-gray-50" x-data="app" x-init="init()">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-display font-bold text-primary-600">CHOPHOUSE</h1>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</a>
+                        <a href="#menu" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Menu</a>
+                        <a href="#catering" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Catering</a>
+                        <a href="#about" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">About</a>
+                        <a href="#contact" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Contact</a>
+                    </div>
+                </div>
+
+                <!-- Cart & Auth Buttons -->
+                <div class="flex items-center space-x-4">
+                    <!-- Cart Icon -->
+                    <button @click="cartOpen = true" class="relative p-2 text-gray-700 hover:text-primary-600 transition-colors">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span x-show="cart.length > 0" x-text="cart.length" class="absolute -top-1 -right-1 bg-primary-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"></span>
+                    </button>
+                    {% if user.is_authenticated and user.profile.role == 'user' %}
+                        <span class="font-semibold text-primary-600">Welcome, {{ user.profile.full_name|default:user.email|title }}</span>
+                        <a href="{% url 'logout' %}" class="btn-outline">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn-outline hidden md:inline-block">Login</a>
+                        <a href="{% url 'register' %}" class="btn-primary hidden md:inline-block">Register</a>
+                    {% endif %}
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 text-gray-700 hover:text-primary-600 transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div x-show="mobileMenuOpen" x-transition class="md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+                <a href="#home" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">Home</a>
+                <a href="#menu" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">Menu</a>
+                <a href="#catering" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">Catering</a>
+                <a href="#about" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">About</a>
+                <a href="#contact" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">Contact</a>
+                <!-- Login/Signup Buttons (Mobile) -->
+                {% if user.is_authenticated and user.profile.role == 'user' %}
+                    <span class="block w-full mt-2 font-semibold text-primary-600">Welcome, {{ user.profile.full_name|default:user.email|title }}</span>
+                    <a href="{% url 'logout' %}" class="block w-full mt-2 btn-outline">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="block w-full mt-2 btn-outline">Login</a>
+                    <a href="{% url 'register' %}" class="block w-full mt-2 btn-primary">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-gradient min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-black opacity-20"></div>
+        <div class="relative z-10 text-center px-4 sm:px-6 lg:px-8">
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white text-shadow mb-6">
+                Welcome to <span class="text-primary-400">CHOPHOUSE</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-white text-shadow mb-8 max-w-3xl mx-auto">
+                Premium finger foods, sauced chicken & turkey, yogurt parfaits, and exceptional catering services
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#menu" class="btn-primary text-lg">
+                    <i class="fas fa-utensils mr-2"></i>
+                    Explore Menu
+                </a>
+                <a href="#catering" class="btn-outline text-lg bg-white bg-opacity-90">
+                    <i class="fas fa-calendar-alt mr-2"></i>
+                    Book Catering
+                </a>
+            </div>
+        </div>
+        
+        <!-- Floating Elements -->
+        <div class="absolute top-20 left-10 animate-bounce-gentle">
+            <i class="fas fa-drumstick-bite text-4xl text-primary-300 opacity-60"></i>
+        </div>
+        <div class="absolute top-40 right-20 animate-bounce-gentle" style="animation-delay: 0.5s;">
+            <i class="fas fa-cake text-4xl text-secondary-300 opacity-60"></i>
+        </div>
+        <div class="absolute bottom-40 left-20 animate-bounce-gentle" style="animation-delay: 1s;">
+            <i class="fas fa-wine-glass text-4xl text-primary-300 opacity-60"></i>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4">Our Menu</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Discover our delicious selection of finger foods, beverages, and desserts
+                </p>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button @click="activeCategory = 'all'" :class="activeCategory === 'all' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">All Items</button>
+                <button @click="activeCategory = 'finger-foods'" :class="activeCategory === 'finger-foods' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Finger Foods</button>
+                <button @click="activeCategory = 'beverages'" :class="activeCategory === 'beverages' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Beverages</button>
+                <button @click="activeCategory = 'desserts'" :class="activeCategory === 'desserts' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Desserts</button>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <template x-for="product in filteredProducts" :key="product.id">
+                    <div class="product-card">
+                        <img :src="product.image || 'https://picsum.photos/400/300?random=1'" :alt="product.name" class="w-full h-48 object-cover transition-transform duration-300 hover:scale-110 rounded-lg" @error="event.target.src='https://picsum.photos/400/300?random=1'" />
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2" x-text="product.name"></h3>
+                            <div class="flex items-center gap-2 mb-2">
+                                <template x-for="star in 5">
+                                    <i class="fas fa-star text-xs" :class="product.average_rating >= star ? 'text-yellow-400' : 'text-gray-300'"></i>
+                                </template>
+                                <span class="text-sm text-gray-600 ml-1" x-text="product.average_rating ? product.average_rating.toFixed(1) : '0.0'"></span>
+                                <span class="text-xs text-gray-500 ml-1" x-text="'(' + (product.review_count || 0) + ' reviews)'"></span>
+                            </div>
+                            <p class="text-gray-600 mb-4" x-text="product.description"></p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-2xl font-bold text-primary-600" x-text="'₦' + product.price"></span>
+                                <button @click="addToCart(product)" class="btn-primary text-sm">
+                                    <i class="fas fa-plus mr-1"></i>
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catering Section -->
+    <section id="catering" class="py-20 gradient-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4">Catering Services</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Let us make your event unforgettable with our premium catering and event setup services
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <template x-for="service in cateringServices" :key="service.id">
+                    <div class="card p-8 text-center">
+                        <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i :class="service.icon + ' text-2xl text-primary-600'"></i>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-900 mb-4" x-text="service.name"></h3>
+                        <p class="text-gray-600 mb-6" x-text="service.short_description"></p>
+                        <button @click="showServiceDetails(service)" class="btn-outline">Learn More</button>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-6">About CHOPHOUSE</h2>
+                    <p class="text-lg text-gray-600 mb-6">
+                        Founded with a passion for creating exceptional culinary experiences, CHOPHOUSE has been serving premium finger foods and catering services to our valued customers.
+                    </p>
+                    <p class="text-lg text-gray-600 mb-6">
+                        Our commitment to quality ingredients, innovative recipes, and outstanding service has made us the go-to choice for events and gatherings of all sizes.
+                    </p>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary-600 mb-2">500+</div>
+                            <div class="text-gray-600">Events Catered</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary-600 mb-2">50+</div>
+                            <div class="text-gray-600">Menu Items</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="CHOPHOUSE Kitchen" class="rounded-xl shadow-2xl">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 gradient-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4">Get In Touch</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Ready to plan your next event? Contact us for a consultation and quote.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Contact Form -->
+                <div class="card p-8">
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">Send us a Message</h3>
+                    
+                    <!-- Success Message -->
+                    <div x-show="contactSuccess" x-transition class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <span x-text="contactSuccessMessage"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div x-show="contactError" x-transition class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <span x-text="contactErrorMessage"></span>
+                        </div>
+                    </div>
+                    
+                    <form @submit.prevent="submitContactForm()" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                                <input type="text" x-model="contactForm.firstName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                                <input type="text" x-model="contactForm.lastName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                            <input type="email" x-model="contactForm.email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                            <input type="tel" x-model="contactForm.phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Message *</label>
+                            <textarea rows="4" x-model="contactForm.message" required minlength="10" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
+                        </div>
+                        <button type="submit" :disabled="contactSubmitting" class="btn-primary w-full" :class="{ 'opacity-50 cursor-not-allowed': contactSubmitting }">
+                            <i class="fas fa-paper-plane mr-2" :class="{ 'fa-spin': contactSubmitting }"></i>
+                            <span x-text="contactSubmitting ? 'Sending...' : 'Send Message'"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="space-y-8">
+                    <div class="card p-8">
+                        <h3 class="text-2xl font-semibold text-gray-900 mb-6">Contact Information</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-map-marker-alt text-primary-600 text-xl mr-4"></i>
+                                <div>
+                                    <div class="font-semibold">Address</div>
+                                    <div class="text-gray-600" x-text="siteSettings?.address || '123 Food Street, Culinary District'"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-phone text-primary-600 text-xl mr-4"></i>
+                                <div>
+                                    <div class="font-semibold">Phone</div>
+                                    <div class="text-gray-600" x-text="siteSettings?.phone || '+1 (555) 123-4567'"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope text-primary-600 text-xl mr-4"></i>
+                                <div>
+                                    <div class="font-semibold">Email</div>
+                                    <div class="text-gray-600" x-text="siteSettings?.email || 'info@chophouse.com'"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-clock text-primary-600 text-xl mr-4"></i>
+                                <div>
+                                    <div class="font-semibold">Hours</div>
+                                    <div class="text-gray-600" x-text="siteSettings?.hours || 'Mon-Sat: 9AM-9PM'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-8">
+                        <h3 class="text-2xl font-semibold text-gray-900 mb-6">Follow Us</h3>
+                        <div class="flex space-x-4">
+                            <template x-if="siteSettings?.facebook">
+                                <a :href="siteSettings.facebook" target="_blank" class="w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                            </template>
+                            <template x-if="siteSettings?.instagram">
+                                <a :href="siteSettings.instagram" target="_blank" class="w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                            </template>
+                            <template x-if="siteSettings?.twitter">
+                                <a :href="siteSettings.twitter" target="_blank" class="w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                            </template>
+                            <template x-if="siteSettings?.tiktok">
+                                <a :href="siteSettings.tiktok" target="_blank" class="w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors">
+                                    <i class="fab fa-tiktok"></i>
+                                </a>
+                            </template>
+                            <template x-if="siteSettings?.youtube">
+                                <a :href="siteSettings.youtube" target="_blank" class="w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors">
+                                    <i class="fab fa-youtube"></i>
+                                </a>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shopping Cart Modal -->
+    <div x-show="cartOpen" x-transition class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Shopping Cart</h3>
+                        <button @click="cartOpen = false" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div x-show="cart.length === 0" class="text-center py-8">
+                        <i class="fas fa-shopping-cart text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">Your cart is empty</p>
+                    </div>
+                    
+                    <div x-show="cart.length > 0" class="space-y-4">
+                        <template x-for="item in cart" :key="item.id">
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <img :src="item.image" :alt="item.name" class="w-12 h-12 object-cover rounded-lg mr-4">
+                                    <div>
+                                        <div class="font-semibold" x-text="item.name"></div>
+                                        <div class="text-gray-600" x-text="'₦' + item.price"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button @click="updateQuantity(item, -1)" class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
+                                        <i class="fas fa-minus text-sm"></i>
+                                    </button>
+                                    <span class="w-8 text-center" x-text="item.quantity"></span>
+                                    <button @click="updateQuantity(item, 1)" class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
+                                        <i class="fas fa-plus text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between text-lg font-semibold">
+                                <span>Total:</span>
+                                <span x-text="'₦' + cartTotal"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div x-show="cart.length > 0" class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button @click="checkout()" class="btn-primary w-full sm:w-auto sm:ml-3">
+                        <i class="fas fa-credit-card mr-2"></i>
+                        Checkout
+                    </button>
+                    <button @click="continueShopping()" class="btn-outline w-full sm:w-auto mt-3 sm:mt-0">
+                        Continue Shopping
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div x-show="checkoutOpen" x-transition class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-semibold text-gray-900">Checkout</h3>
+                        <button @click="checkoutOpen = false" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Progress Steps -->
+                    <div class="flex items-center justify-center mb-8">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center" :class="checkoutStep >= 1 ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-600'">1</div>
+                            <div class="w-16 h-1 mx-2" :class="checkoutStep >= 2 ? 'bg-primary-500' : 'bg-gray-200'"></div>
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center" :class="checkoutStep >= 2 ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-600'">2</div>
+                            <div class="w-16 h-1 mx-2" :class="checkoutStep >= 3 ? 'bg-primary-500' : 'bg-gray-200'"></div>
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center" :class="checkoutStep >= 3 ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-600'">3</div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Customer Information -->
+                    <div x-show="checkoutStep === 1">
+                        <h4 class="text-lg font-semibold mb-4">Customer Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                                <input type="text" x-model="orderDetails.customerInfo.firstName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                                <input type="text" x-model="orderDetails.customerInfo.lastName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" x-model="orderDetails.customerInfo.email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                                <input type="tel" x-model="orderDetails.customerInfo.phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Delivery Information -->
+                    <div x-show="checkoutStep === 2">
+                        <h4 class="text-lg font-semibold mb-4">Delivery Information</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Delivery Address</label>
+                                <input type="text" x-model="orderDetails.deliveryInfo.address" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                                    <input type="text" x-model="orderDetails.deliveryInfo.city" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">State</label>
+                                    <input type="text" x-model="orderDetails.deliveryInfo.state" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">ZIP Code</label>
+                                    <input type="text" x-model="orderDetails.deliveryInfo.zipCode" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Delivery Instructions (Optional)</label>
+                                <textarea x-model="orderDetails.deliveryInfo.instructions" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Payment & Review -->
+                    <div x-show="checkoutStep === 3">
+                        <h4 class="text-lg font-semibold mb-4">Payment & Review</h4>
+                        
+                        <!-- Order Summary -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                            <h5 class="font-semibold mb-3">Order Summary</h5>
+                            <div class="space-y-2">
+                                <template x-for="item in cart" :key="item.id">
+                                    <div class="flex justify-between">
+                                        <span x-text="item.name + ' x' + item.quantity"></span>
+                                        <span x-text="'₦' + (item.price * item.quantity).toFixed(2)"></span>
+                                    </div>
+                                </template>
+                                <div class="border-t pt-2 mt-2">
+                                    <div class="flex justify-between font-semibold">
+                                        <span>Total:</span>
+                                        <span x-text="'₦' + cartTotal"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Information -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
+                                <input type="text" x-model="orderDetails.paymentInfo.cardNumber" placeholder="1234 5678 9012 3456" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                                    <input type="text" x-model="orderDetails.paymentInfo.expiry" placeholder="MM/YY" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">CVV</label>
+                                    <input type="text" x-model="orderDetails.paymentInfo.cvv" placeholder="123" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button x-show="checkoutStep === 3" @click="placeOrder()" class="btn-primary w-full sm:w-auto sm:ml-3">
+                        <i class="fas fa-check mr-2"></i>
+                        Place Order
+                    </button>
+                    <button x-show="checkoutStep < 3" @click="nextCheckoutStep()" class="btn-primary w-full sm:w-auto sm:ml-3">
+                        Continue
+                    </button>
+                    <button x-show="checkoutStep > 1" @click="prevCheckoutStep()" class="btn-outline w-full sm:w-auto mt-3 sm:mt-0">
+                        Back
+                    </button>
+                    <button @click="checkoutOpen = false" class="btn-outline w-full sm:w-auto mt-3 sm:mt-0">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Details Modal -->
+    <div x-show="serviceModalOpen" x-transition class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                                <i :class="selectedService?.icon + ' text-xl text-primary-600'"></i>
+                            </div>
+                            <h3 class="text-2xl font-semibold text-gray-900" x-text="selectedService?.name"></h3>
+                        </div>
+                        <button @click="closeServiceModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Service Content -->
+                    <div class="space-y-6">
+                        <!-- Detailed Description -->
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">Service Overview</h4>
+                            <div class="prose max-w-none text-gray-600" x-html="selectedService?.detailed_description?.replace(/\n/g, '<br>')"></div>
+                        </div>
+
+                        <!-- Features -->
+                        <div x-show="selectedService?.features?.length > 0">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">What's Included</h4>
+                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <template x-for="feature in selectedService?.features" :key="feature">
+                                    <li class="flex items-center text-gray-600">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span x-text="feature"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+
+                        <!-- Pricing Information -->
+                        <div x-show="selectedService?.pricing_info">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">Pricing Information</h4>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-gray-700" x-text="selectedService?.pricing_info"></p>
+                            </div>
+                        </div>
+
+                        <!-- Call to Action -->
+                        <div class="bg-primary-50 p-6 rounded-lg text-center">
+                            <h4 class="text-lg font-semibold text-primary-900 mb-2">Ready to Get Started?</h4>
+                            <p class="text-primary-700 mb-4">Contact us to discuss your specific needs and get a personalized quote.</p>
+                            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                <a href="#contact" @click="closeServiceModal()" class="btn-primary">
+                                    <i class="fas fa-phone mr-2"></i>
+                                    Contact Us
+                                </a>
+                                <button @click="closeServiceModal()" class="btn-outline">
+                                    <i class="fas fa-times mr-2"></i>
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Details Modal (fixed rectangle, strict two-column, blurred overlay, compact) -->
+    <div x-show="productModalOpen" x-transition class="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/80" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-[95vw] max-w-[500px] h-[260px] md:h-[260px] p-0 relative flex flex-col overflow-hidden">
+            <button @click="closeProductModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 z-10">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <template x-if="selectedProduct">
+                <div class="flex flex-row h-full">
+                    <!-- Image on the left, fixed size, centered vertically -->
+                    <div class="flex items-center justify-center bg-gray-100 rounded-l-lg w-1/3 h-full">
+                        <img :src="selectedProduct.image || 'https://picsum.photos/100/100?random=1'" :alt="selectedProduct.name" class="w-20 h-20 object-cover rounded-lg">
+                    </div>
+                    <!-- Details on the right, vertically aligned -->
+                    <div class="flex-1 flex flex-col justify-center px-6 py-4 gap-1 overflow-y-auto">
+                        <h2 class="text-lg font-bold mb-1" x-text="selectedProduct.name"></h2>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="bg-primary-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold" x-text="selectedProduct.category"></span>
+                            <span class="flex items-center ml-2">
+                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                <span class="font-semibold text-sm" x-text="selectedProduct.average_rating || '0'"></span>
+                                <span class="text-xs text-gray-500 ml-1" x-text="'(' + (selectedProduct.review_count || 0) + ')'"></span>
+                            </span>
+                        </div>
+                        <div class="text-primary-600 font-bold text-base mb-1" x-text="'₦' + selectedProduct.price"></div>
+                        <p class="text-gray-600 mb-2 text-xs" x-text="selectedProduct.description"></p>
+                        <div class="flex gap-2 mb-2">
+                            <button @click="addToCart(selectedProduct)" class="btn-primary text-xs px-3 py-1">
+                                <i class="fas fa-plus mr-1"></i> Add to Cart
+                            </button>
+                            <button @click="toggleWishlist(selectedProduct)" class="btn-outline text-xs px-3 py-1" :class="isInWishlist(selectedProduct) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'">
+                                <i class="fas fa-heart" :class="isInWishlist(selectedProduct) ? 'fas' : 'far'"></i> Wishlist
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Customer Reviews Section (full width below, scrollable if needed) -->
+                <div class="px-6 pb-4 pt-2 overflow-y-auto" style="max-height: 120px;">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-base font-semibold">Customer Reviews</h3>
+                        <select x-model="reviewSort" class="px-2 py-1 border rounded text-xs">
+                            <option value="newest">Newest</option>
+                            <option value="top">Top Rated</option>
+                        </select>
+                    </div>
+                    <template x-if="sortedReviews().length > 0">
+                        <div class="space-y-2 mb-4 max-h-20 overflow-y-auto">
+                            <template x-for="review in sortedReviews()" :key="review.id">
+                                <div class="border-b pb-1">
+                                    <div class="flex items-center gap-2 mb-0.5">
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <span class="font-semibold text-xs" x-text="review.rating"></span>
+                                        <span class="text-gray-500 text-xs ml-2" x-text="review.customer_name"></span>
+                                        <span class="text-green-600 text-xs ml-2" x-show="review.is_verified_purchase">Verified</span>
+                                    </div>
+                                    <div class="text-gray-700 text-xs" x-text="review.comment"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template x-if="sortedReviews().length === 0">
+                        <div class="text-gray-500 mb-4 text-xs">No reviews yet. Be the first to review this product!</div>
+                    </template>
+                    <!-- Review Form -->
+                    <form @submit.prevent="submitReview()" class="space-y-2 bg-gray-50 p-2 rounded-lg mt-2">
+                        <div class="flex gap-2 items-center">
+                            <label class="font-semibold text-xs">Your Rating:</label>
+                            <template x-for="star in 5" :key="star">
+                                <i class="fas fa-star cursor-pointer text-base" :class="reviewForm.rating >= star ? 'text-yellow-400' : 'text-gray-300'" @click="reviewForm.rating = star"></i>
+                            </template>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" x-model="reviewForm.name" placeholder="Your Name" class="flex-1 px-2 py-1 border border-gray-300 rounded-lg text-xs" required>
+                            <input type="email" x-model="reviewForm.email" placeholder="Your Email" class="flex-1 px-2 py-1 border border-gray-300 rounded-lg text-xs" required>
+                        </div>
+                        <textarea x-model="reviewForm.comment" placeholder="Your Review" class="w-full px-2 py-1 border border-gray-300 rounded-lg text-xs" required></textarea>
+                        <button type="submit" class="btn-primary w-full text-xs py-1" :disabled="reviewSubmitting">
+                            <span x-show="!reviewSubmitting">Submit Review</span>
+                            <span x-show="reviewSubmitting">Submitting...</span>
+                        </button>
+                    </form>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Wishlist Modal -->
+    <div x-show="wishlistModalOpen" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-8 relative">
+            <button @click="closeWishlistModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 text-center">My Wishlist</h2>
+            <template x-if="wishlistItems.length === 0">
+                <div class="text-center text-gray-500">Your wishlist is empty.</div>
+            </template>
+            <div class="space-y-4 max-h-96 overflow-y-auto" x-show="wishlistItems.length > 0">
+                <template x-for="item in wishlistItems" :key="item.id">
+                    <div class="flex items-center gap-4 border-b pb-4">
+                        <img :src="item.image || 'https://picsum.photos/80/80?random=2'" :alt="item.name" class="w-20 h-20 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <div class="font-semibold text-lg" x-text="item.name"></div>
+                            <div class="text-gray-500 text-sm" x-text="item.category"></div>
+                            <div class="text-primary-600 font-bold text-xl" x-text="'₦' + item.price"></div>
+                        </div>
+                        <button @click="toggleWishlist(item)" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-2xl font-display font-bold text-primary-400 mb-4" x-text="siteSettings?.site_name || 'CHOPHOUSE'"></h3>
+                    <p class="text-gray-400 mb-4" x-text="siteSettings?.tagline || 'Premium finger foods and catering services for all your special occasions.'"></p>
+                    <div class="flex space-x-4">
+                        <template x-if="siteSettings?.facebook">
+                            <a :href="siteSettings.facebook" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                        </template>
+                        <template x-if="siteSettings?.instagram">
+                            <a :href="siteSettings.instagram" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </template>
+                        <template x-if="siteSettings?.twitter">
+                            <a :href="siteSettings.twitter" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        </template>
+                        <template x-if="siteSettings?.tiktok">
+                            <a :href="siteSettings.tiktok" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
+                                <i class="fab fa-tiktok"></i>
+                            </a>
+                        </template>
+                        <template x-if="siteSettings?.youtube">
+                            <a :href="siteSettings.youtube" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+                        <li><a href="#menu" class="text-gray-400 hover:text-white transition-colors">Menu</a></li>
+                        <li><a href="#catering" class="text-gray-400 hover:text-white transition-colors">Catering</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">About</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Finger Foods</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Event Setup</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Custom Cakes</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Catering</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2">
+                        <li class="text-gray-400">
+                            <i class="fas fa-phone mr-2"></i>
+                            <span x-text="siteSettings?.phone || '+1 (555) 123-4567'"></span>
+                        </li>
+                        <li class="text-gray-400">
+                            <i class="fas fa-envelope mr-2"></i>
+                            <span x-text="siteSettings?.email || 'info@chophouse.com'"></span>
+                        </li>
+                        <li class="text-gray-400">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            <span x-text="siteSettings?.address || '123 Food Street, Culinary District'"></span>
+                        </li>
+                        <li class="text-gray-400">
+                            <i class="fas fa-clock mr-2"></i>
+                            <span x-text="siteSettings?.hours || 'Mon-Sat: 9AM-9PM'"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <p class="text-gray-400">&copy; 2024 <span x-text="siteSettings?.site_name || 'CHOPHOUSE'"></span>. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alpine.js and Custom Scripts -->
+    <script src="{% static 'app.js' %}?v=1.1"></script>
+</body>
+</html> 

@@ -1,0 +1,369 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management | CHOPHOUSE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'output.css' %}" rel="stylesheet">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #ed7516 0%, #f1943d 50%, #f6bb77 100%);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #fef7ee 0%, #fdedd6 100%);
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ed7516 0%, #f1943d 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(237, 117, 22, 0.4);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #ed7516;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #ed7516;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-outline:hover {
+            background: #ed7516;
+            color: white;
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .staff-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .staff-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #f6bb77;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans" x-data="{ sidebarOpen: false, showAddForm: false }">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-display font-bold text-primary-600">CHOPHOUSE</h1>
+                        <span class="text-sm text-gray-500">Staff Management</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Dashboard</a>
+                        <a href="{% url 'staff_management' %}" class="text-primary-600 px-3 py-2 rounded-md text-sm font-medium">Staff Management</a>
+                        <a href="/" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Main Site</a>
+                    </div>
+                </div>
+
+                <!-- User Menu & Mobile Menu Button -->
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:block">
+                        <span class="text-gray-700 text-sm">Welcome, {{ user.email }}</span>
+                    </div>
+                    <a href="{% url 'logout' %}" class="btn-outline hidden md:inline-block">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                    <!-- Mobile menu button -->
+                    <button @click="sidebarOpen = !sidebarOpen" class="md:hidden p-2 text-gray-700 hover:text-primary-600 transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Sidebar -->
+    <div x-show="sidebarOpen" x-transition class="md:hidden fixed inset-0 z-40">
+        <div class="fixed inset-0 bg-gray-600 bg-opacity-75" @click="sidebarOpen = false"></div>
+        <div class="relative flex-1 flex flex-col max-w-xs w-full bg-white">
+            <div class="absolute top-0 right-0 -mr-12 pt-2">
+                <button @click="sidebarOpen = false" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                    <i class="fas fa-times text-white"></i>
+                </button>
+            </div>
+            <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+                <div class="flex-shrink-0 flex items-center px-4">
+                    <h1 class="text-xl font-display font-bold text-primary-600">CHOPHOUSE</h1>
+                </div>
+                <nav class="mt-5 px-2 space-y-1">
+                    <a href="{% url 'dashboard' %}" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md">
+                        <i class="fas fa-tachometer-alt mr-4"></i>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'staff_management' %}" class="bg-primary-100 text-primary-600 group flex items-center px-2 py-2 text-base font-medium rounded-md">
+                        <i class="fas fa-users mr-4"></i>
+                        Staff Management
+                    </a>
+                    <a href="/" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md">
+                        <i class="fas fa-home mr-4"></i>
+                        Main Site
+                    </a>
+                </nav>
+            </div>
+            <div class="flex-shrink-0 flex border-t border-gray-200 p-4">
+                <div class="flex items-center">
+                    <div>
+                        <p class="text-base font-medium text-gray-700">{{ user.email }}</p>
+                        <a href="{% url 'logout' %}" class="text-sm font-medium text-primary-600 hover:text-primary-500">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="min-h-screen bg-gray-50">
+        <!-- Hero Section -->
+        <section class="hero-gradient py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h1 class="text-4xl md:text-5xl font-display font-bold text-white text-shadow mb-4">
+                        Staff <span class="text-primary-200">Management</span>
+                    </h1>
+                    <p class="text-xl text-white text-shadow mb-8 max-w-3xl mx-auto">
+                        Manage your team members, add new staff, and control access permissions
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button @click="showAddForm = true" class="btn-primary text-lg">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Add New Staff
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn-outline text-lg bg-white bg-opacity-90">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Staff Management Section -->
+        <section class="py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Add Staff Form Modal -->
+                <div x-show="showAddForm" x-transition class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+                    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                        </div>
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <form method="post" class="p-6">
+                                {% csrf_token %}
+                                <div class="mb-4">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Add New Staff Member</h3>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input type="email" name="email" id="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                    <input type="password" name="password" id="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                </div>
+                                <div class="mb-6">
+                                    <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                                    <select name="role" id="role" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                        <option value="staff">Staff</option>
+                                        <option value="owner">Owner</option>
+                                    </select>
+                                </div>
+                                <div class="flex justify-end space-x-3">
+                                    <button type="button" @click="showAddForm = false" class="btn-outline">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="btn-primary">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        Add Staff
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Staff List -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-display font-bold text-gray-900">Current Staff</h2>
+                        <button @click="showAddForm = true" class="btn-primary">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Add Staff
+                        </button>
+                    </div>
+
+                    {% if messages %}
+                        <div class="mb-6">
+                            {% for message in messages %}
+                                <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% elif message.tags == 'error' %}bg-red-100 text-red-700 border border-red-200{% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Staff Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for user_profile in staff_members %}
+                        <div class="staff-card p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                                        <i class="fas fa-user text-xl text-primary-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">{{ user_profile.user.email }}</h3>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                            {% if user_profile.role == 'owner' %}bg-purple-100 text-purple-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                                            {{ user_profile.role|title }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="border-t border-gray-200 pt-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-500">ID: {{ user_profile.user.id }}</span>
+                                    {% if user_profile.user != user %}
+                                    <form method="post" class="inline" onsubmit="return confirm('Are you sure you want to remove this staff member?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="remove">
+                                        <input type="hidden" name="user_id" value="{{ user_profile.user.id }}">
+                                        <button type="submit" class="btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                            Remove
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-sm text-gray-400">Current User</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-span-full text-center py-12">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-users text-2xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">No Staff Members</h3>
+                            <p class="text-gray-600 mb-4">Start building your team by adding staff members.</p>
+                            <button @click="showAddForm = true" class="btn-primary">
+                                <i class="fas fa-user-plus mr-2"></i>
+                                Add First Staff Member
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="card p-8">
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">Staff Statistics</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-users text-2xl text-primary-600"></i>
+                            </div>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">{{ total_staff }}</h4>
+                            <p class="text-gray-600">Total Staff</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-crown text-2xl text-purple-600"></i>
+                            </div>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">{{ owner_count }}</h4>
+                            <p class="text-gray-600">Owners</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-user-tie text-2xl text-blue-600"></i>
+                            </div>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">{{ staff_count }}</h4>
+                            <p class="text-gray-600">Staff Members</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Alpine.js data
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('staffManagement', () => ({
+                init() {
+                    console.log('Staff management loaded');
+                }
+            }));
+        });
+    </script>
+</body>
+</html> 
