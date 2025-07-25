@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist
+from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment
 
 # Customize admin site
 admin.site.site_header = "CHOPHOUSE Admin"
@@ -216,3 +216,15 @@ class WishlistAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('product')
+
+@admin.register(ProductRating)
+class ProductRatingAdmin(admin.ModelAdmin):
+    list_display = ['product', 'user', 'rating', 'created_at']
+    list_filter = ['product', 'user', 'rating', 'created_at']
+    search_fields = ['product__name', 'user__username']
+
+@admin.register(ProductComment)
+class ProductCommentAdmin(admin.ModelAdmin):
+    list_display = ['product', 'user', 'comment', 'created_at']
+    list_filter = ['product', 'user', 'created_at']
+    search_fields = ['product__name', 'user__username', 'comment']

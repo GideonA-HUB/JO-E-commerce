@@ -6,6 +6,9 @@ from django.dispatch import receiver
 from django.db.models import Avg, Count
 import stripe
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
@@ -254,3 +257,29 @@ class ContactMessage(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 # Signal removed - Telegram notifications disabled
+
+class ProductRating(models.Model):
+    product = models.ForeignKey(Product, related_name='ratings', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['product', 'user']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user} rated {self.product} ({self.rating})"
+
+class ProductComment(models.Model):
+    product = models.ForeignKey(Product, related_name='comments', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['product', 'user']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user} commented on {self.product}"

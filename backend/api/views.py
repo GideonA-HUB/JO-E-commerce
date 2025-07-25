@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.db.models import Q
@@ -12,11 +12,12 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import stripe
 import json
-from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist
+from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment
 from .serializers import (
     ProductSerializer, OrderSerializer, CreateOrderSerializer,
     SiteSettingsSerializer, CateringServiceSerializer, ContactMessageSerializer,
-    ProductReviewSerializer, CreateProductReviewSerializer, WishlistSerializer, CreateWishlistSerializer
+    ProductReviewSerializer, CreateProductReviewSerializer, WishlistSerializer, CreateWishlistSerializer,
+    ProductRatingSerializer, CreateProductRatingSerializer, ProductCommentSerializer, CreateProductCommentSerializer
 )
 
 # Configure Stripe
@@ -299,6 +300,44 @@ class WishlistViewSet(viewsets.ModelViewSet):
         return Response({
             'error': 'Customer email and product ID required'
         }, status=status.HTTP_400_BAD_REQUEST)
+
+class ProductRatingViewSet(viewsets.ModelViewSet):
+    queryset = ProductRating.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CreateProductRatingSerializer
+        return ProductRatingSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        product_id = self.request.query_params.get('product_id')
+        if product_id:
+            queryset = queryset.filter(product_id=product_id)
+        return queryset
+
+class ProductCommentViewSet(viewsets.ModelViewSet):
+    queryset = ProductComment.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CreateProductCommentSerializer
+        return ProductCommentSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        product_id = self.request.query_params.get('product_id')
+        if product_id:
+            queryset = queryset.filter(product_id=product_id)
+        return queryset
 
 @api_view(['GET'])
 def site_settings(request):

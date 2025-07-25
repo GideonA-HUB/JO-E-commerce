@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist
+from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -107,3 +107,27 @@ class ContactMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactMessage
         fields = '__all__' 
+
+class ProductRatingSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+    class Meta:
+        model = ProductRating
+        fields = ['id', 'product', 'user', 'rating', 'created_at']
+        read_only_fields = ['user', 'created_at']
+
+class CreateProductRatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductRating
+        fields = ['product', 'rating']
+
+class ProductCommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+    class Meta:
+        model = ProductComment
+        fields = ['id', 'product', 'user', 'comment', 'created_at']
+        read_only_fields = ['user', 'created_at']
+
+class CreateProductCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductComment
+        fields = ['product', 'comment'] 
