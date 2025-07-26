@@ -9,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="{% static 'main.css' %}?v=1.2" rel="stylesheet">
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         .animate-fade-in {
             animation: fadeIn 0.3s ease-out;
@@ -522,6 +523,22 @@
                     <div x-show="checkoutStep === 3">
                         <h4 class="text-lg font-semibold mb-4">Payment & Review</h4>
                         
+                        <!-- Success Message -->
+                        <div x-show="orderSuccess" x-transition class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <span x-text="orderSuccessMessage"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Message -->
+                        <div x-show="orderError" x-transition class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                <span x-text="orderErrorMessage"></span>
+                            </div>
+                        </div>
+                        
                         <!-- Order Summary -->
                         <div class="bg-gray-50 p-4 rounded-lg mb-6">
                             <h5 class="font-semibold mb-3">Order Summary</h5>
@@ -544,18 +561,11 @@
                         <!-- Payment Information -->
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
-                                <input type="text" x-model="orderDetails.paymentInfo.cardNumber" placeholder="1234 5678 9012 3456" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
-                                    <input type="text" x-model="orderDetails.paymentInfo.expiry" placeholder="MM/YY" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Card Information</label>
+                                <div id="card-element" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                    <!-- Stripe Elements will be inserted here -->
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">CVV</label>
-                                    <input type="text" x-model="orderDetails.paymentInfo.cvv" placeholder="123" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                                </div>
+                                <div id="card-errors" class="text-red-600 text-sm mt-2" role="alert"></div>
                             </div>
                         </div>
                     </div>
@@ -563,9 +573,9 @@
                 
                 <!-- Footer -->
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button x-show="checkoutStep === 3" @click="placeOrder()" class="btn-primary w-full sm:w-auto sm:ml-3">
-                        <i class="fas fa-check mr-2"></i>
-                        Place Order
+                    <button x-show="checkoutStep === 3" @click="placeOrder()" :disabled="paymentProcessing" class="btn-primary w-full sm:w-auto sm:ml-3" :class="{ 'opacity-50 cursor-not-allowed': paymentProcessing }">
+                        <i class="fas fa-check mr-2" :class="{ 'fa-spin': paymentProcessing }"></i>
+                        <span x-text="paymentProcessing ? 'Processing...' : 'Place Order'"></span>
                     </button>
                     <button x-show="checkoutStep < 3" @click="nextCheckoutStep()" class="btn-primary w-full sm:w-auto sm:ml-3">
                         Continue
