@@ -76,6 +76,17 @@ document.addEventListener('alpine:init', () => {
         orderError: false,
         orderErrorMessage: '',
         
+        searchQuery: '',
+        selectedCategory: 'all',
+        minPrice: '',
+        maxPrice: '',
+        categories: [
+            { value: 'all', label: 'All' },
+            { value: 'finger-foods', label: 'Finger Foods' },
+            { value: 'beverages', label: 'Beverages' },
+            { value: 'desserts', label: 'Desserts' }
+        ],
+        
         init() {
             this.fetchProducts();
             this.fetchCateringServices();
@@ -126,8 +137,15 @@ document.addEventListener('alpine:init', () => {
         
         async fetchProducts() {
             this.loadingProducts = true;
+            let url = '/api/products/';
+            const params = [];
+            if (this.searchQuery) params.push(`search=${encodeURIComponent(this.searchQuery)}`);
+            if (this.selectedCategory && this.selectedCategory !== 'all') params.push(`category=${encodeURIComponent(this.selectedCategory)}`);
+            if (this.minPrice) params.push(`price__gte=${this.minPrice}`);
+            if (this.maxPrice) params.push(`price__lte=${this.maxPrice}`);
+            if (params.length) url += '?' + params.join('&');
             try {
-                const res = await fetch('/api/products/');
+                const res = await fetch(url);
                 if (res.ok) {
                     this.products = await res.json();
                 }
