@@ -283,3 +283,24 @@ class ProductComment(models.Model):
 
     def __str__(self):
         return f"{self.user} commented on {self.product}"
+
+class BlogPost(models.Model):
+    CATEGORY_CHOICES = [
+        ('recipes', 'Recipes'),
+        ('tips', 'Food Tips'),
+        ('updates', 'Company Updates'),
+    ]
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    content = models.TextField()
+    image = models.URLField(blank=True, null=True)
+    author = models.CharField(max_length=100)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='updates')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title

@@ -12,12 +12,13 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import stripe
 import json
-from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment
+from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment, BlogPost
 from .serializers import (
     ProductSerializer, OrderSerializer, CreateOrderSerializer,
     SiteSettingsSerializer, CateringServiceSerializer, ContactMessageSerializer,
     ProductReviewSerializer, CreateProductReviewSerializer, WishlistSerializer, CreateWishlistSerializer,
-    ProductRatingSerializer, CreateProductRatingSerializer, ProductCommentSerializer, CreateProductCommentSerializer
+    ProductRatingSerializer, CreateProductRatingSerializer, ProductCommentSerializer, CreateProductCommentSerializer,
+    BlogPostSerializer
 )
 
 # Configure Stripe
@@ -276,10 +277,10 @@ class WishlistViewSet(viewsets.ModelViewSet):
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=False, methods=['delete'])
+    @action(detail=False, methods=['post'])
     def remove_item(self, request):
         customer_email = request.data.get('customer_email')
-        product_id = request.data.get('product_id')
+        product_id = request.data.get('product')
         
         if customer_email and product_id:
             try:
@@ -338,6 +339,13 @@ class ProductCommentViewSet(viewsets.ModelViewSet):
         if product_id:
             queryset = queryset.filter(product_id=product_id)
         return queryset
+
+class BlogPostViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = BlogPost.objects.all()
+    serializer_class = BlogPostSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+    lookup_field = 'slug'
 
 @api_view(['GET'])
 def site_settings(request):

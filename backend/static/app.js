@@ -87,11 +87,45 @@ document.addEventListener('alpine:init', () => {
             { value: 'desserts', label: 'Desserts' }
         ],
         
+        blogPosts: [],
+        blogPostModalOpen: false,
+        selectedBlogPost: null,
+        async fetchBlogPosts() {
+            try {
+                console.log('Fetching blog posts...');
+                const res = await fetch('/api/blog/');
+                if (res.ok) {
+                    const posts = await res.json();
+                    console.log('Blog posts received:', posts);
+                    // Add excerpt property for preview
+                    this.blogPosts = posts.map(post => ({
+                        ...post,
+                        excerpt: post.content.length > 120 ? post.content.slice(0, 120) + '...' : post.content
+                    }));
+                    console.log('Blog posts processed:', this.blogPosts);
+                } else {
+                    console.error('Failed to fetch blog posts:', res.status);
+                }
+            } catch (e) { 
+                console.error('Error fetching blog posts:', e);
+                this.blogPosts = []; 
+            }
+        },
+        openBlogPostModal(post) {
+            this.selectedBlogPost = post;
+            this.blogPostModalOpen = true;
+        },
+        closeBlogPostModal() {
+            this.blogPostModalOpen = false;
+            this.selectedBlogPost = null;
+        },
+        
         init() {
             this.fetchProducts();
             this.fetchCateringServices();
             this.fetchWishlist();
             this.initializeStripe();
+            this.fetchBlogPosts();
         },
         
         // Initialize Stripe
@@ -172,9 +206,14 @@ document.addEventListener('alpine:init', () => {
             return this.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
         },
         updateQuantity(item, change) {
-            item.quantity = Math.max(1, item.quantity + change);
-            if (item.quantity === 0) {
+            const newQuantity = item.quantity + change;
+            
+            if (newQuantity <= 0) {
+                // Remove item from cart if quantity would be 0 or less
                 this.cart = this.cart.filter(cartItem => cartItem.id !== item.id);
+            } else {
+                // Update quantity, ensuring it's at least 1
+                item.quantity = Math.max(1, newQuantity);
             }
         },
         continueShopping() {

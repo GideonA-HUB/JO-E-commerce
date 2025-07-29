@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment
+from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment, BlogPost
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -131,3 +131,8 @@ class CreateProductCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductComment
         fields = ['product', 'comment'] 
+
+class BlogPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlogPost
+        fields = ['id', 'title', 'slug', 'content', 'image', 'author', 'category', 'created_at', 'updated_at'] 

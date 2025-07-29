@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment
+from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment, BlogPost
 
 # Customize admin site
 admin.site.site_header = "CHOPHOUSE Admin"
@@ -228,3 +228,5 @@ class ProductCommentAdmin(admin.ModelAdmin):
     list_display = ['product', 'user', 'comment', 'created_at']
     list_filter = ['product', 'user', 'created_at']
     search_fields = ['product__name', 'user__username', 'comment']
+
+admin.site.register(BlogPost)

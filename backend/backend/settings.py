@@ -147,6 +147,17 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = True  # Only for development
 CORS_ALLOW_CREDENTIALS = True
 
+# Session settings for separate admin and customer sessions
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+SESSION_COOKIE_DOMAIN = None
+
+# Use database sessions for better control
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 # Stripe settings
 STRIPE_PUBLISHABLE_KEY = 'pk_test_your_stripe_publishable_key_here'
 STRIPE_SECRET_KEY = 'sk_test_your_stripe_secret_key_here'

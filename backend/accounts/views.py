@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.conf import settings
 from .models import UserProfile
 from api.models import ContactMessage, Order
 
@@ -18,6 +19,7 @@ def login_view(request):
             return redirect('dashboard')
         else:
             return redirect('main_site')
+    
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -26,25 +28,79 @@ def login_view(request):
             user = authenticate(request, username=user.username, password=password)
         except User.DoesNotExist:
             user = None
+        
         if user is not None:
-            login(request, user)
+            # Check user role to determine session type
             try:
                 role = user.profile.role
             except Exception:
                 logout(request)
                 messages.error(request, 'Profile error. Contact support.')
                 return redirect('login')
+            
+            # Login the user
+            login(request, user)
+            
+            # Create response based on role
             if role in ['owner', 'staff']:
-                return redirect('dashboard')
+                # This is an admin login - redirect to dashboard
+                response = redirect('dashboard')
+                # Set admin session cookie
+                response.set_cookie(
+                    getattr(settings, 'ADMIN_SESSION_COOKIE_NAME', 'admin_sessionid'),
+                    request.session.session_key,
+                    max_age=settings.SESSION_COOKIE_AGE,
+                    domain=settings.SESSION_COOKIE_DOMAIN,
+                    secure=settings.SESSION_COOKIE_SECURE,
+                    httponly=settings.SESSION_COOKIE_HTTPONLY,
+                    samesite=settings.SESSION_COOKIE_SAMESITE
+                )
+                return response
             else:
-                return redirect('main_site')
+                # This is a customer login - redirect to main site
+                response = redirect('main_site')
+                # Set customer session cookie
+                response.set_cookie(
+                    getattr(settings, 'SESSION_COOKIE_NAME', 'customer_sessionid'),
+                    request.session.session_key,
+                    max_age=settings.SESSION_COOKIE_AGE,
+                    domain=settings.SESSION_COOKIE_DOMAIN,
+                    secure=settings.SESSION_COOKIE_SECURE,
+                    httponly=settings.SESSION_COOKIE_HTTPONLY,
+                    samesite=settings.SESSION_COOKIE_SAMESITE
+                )
+                return response
         else:
             messages.error(request, 'Invalid email or password.')
+    
     return render(request, 'accounts/login.html')
 
 def logout_view(request):
+    # Determine which session to clear based on the user's role
+    is_admin_user = False
+    if request.user.is_authenticated:
+        try:
+            role = request.user.profile.role
+            is_admin_user = role in ['owner', 'staff']
+        except Exception:
+            # If we can't determine role, default to customer
+            is_admin_user = False
+    
+    # Logout the user
     logout(request)
-    return redirect(reverse('login'))
+    
+    # Create response
+    response = redirect(reverse('login'))
+    
+    # Clear the appropriate session cookie based on user role
+    if is_admin_user:
+        # Clear admin session cookie
+        response.delete_cookie(getattr(settings, 'ADMIN_SESSION_COOKIE_NAME', 'admin_sessionid'))
+    else:
+        # Clear customer session cookie
+        response.delete_cookie(getattr(settings, 'SESSION_COOKIE_NAME', 'customer_sessionid'))
+    
+    return response
 
 @login_required(login_url='login')
 def dashboard_view(request):

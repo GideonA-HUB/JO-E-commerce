@@ -52,6 +52,7 @@
                         <a href="#catering" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Catering</a>
                         <a href="#about" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">About</a>
                         <a href="#contact" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Contact</a>
+                        <a href="#blog" class="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Blog</a>
                     </div>
                 </div>
 
@@ -838,6 +839,70 @@
         </div>
     </div>
 
+    <!-- Blog Section -->
+    <section id="blog" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4">Our Blog</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Stay updated with our latest news, recipes, and culinary insights.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <template x-for="blogPost in blogPosts" :key="blogPost.id">
+                    <div class="card p-8">
+                        <img :src="blogPost.image || 'https://picsum.photos/400/300?random=3'" :alt="blogPost.title" class="w-full h-48 object-cover rounded-lg mb-6">
+                        <h3 class="text-2xl font-semibold text-gray-900 mb-4" x-text="blogPost.title"></h3>
+                        <p class="text-gray-600 mb-6" x-text="blogPost.excerpt"></p>
+                        <a href="#" @click="openBlogPostModal(blogPost)" class="btn-primary text-sm">Read More</a>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Post Modal -->
+    <div x-show="blogPostModalOpen" x-transition class="fixed inset-0 z-50 overflow-y-auto" style="display: none; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);">
+        <div class="flex items-center justify-center min-h-screen px-4 py-6">
+            <!-- Modal Container - Forced Rectangle with Smaller Size -->
+            <div class="bg-white rounded-lg shadow-2xl transform transition-all duration-300 ease-out" 
+                 style="width: 700px; min-height: 500px; max-width: 95vw; max-height: 85vh; overflow-y: auto; animation: fadeIn 0.3s ease-out; margin: auto;">
+                
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-900" x-text="selectedBlogPost?.title" style="word-break: break-word; white-space: normal; max-width: 80%;"></h3>
+                    <button @click="closeBlogPostModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Modal Content -->
+                <div class="p-4">
+                    <!-- Blog Image - Reduced Size -->
+                    <img :src="selectedBlogPost?.image || 'https://picsum.photos/400/300?random=3'" 
+                         :alt="selectedBlogPost?.title" 
+                         class="w-full object-contain rounded-lg mb-4" 
+                         style="height: 340px; max-height: 340px; object-fit: contain;">
+                    
+                    <!-- Blog Content -->
+                    <div class="prose max-w-none text-gray-600 leading-relaxed" 
+                         x-html="selectedBlogPost?.content?.replace(/\n/g, '<br>')"
+                         style="word-break: break-word; white-space: normal; line-height: 1.6; font-size: 14px;">
+                    </div>
+                    
+                    <!-- Blog Meta -->
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <div class="flex items-center justify-between text-sm text-gray-500">
+                            <span x-text="'By ' + (selectedBlogPost?.author || 'Unknown')"></span>
+                            <span x-text="selectedBlogPost?.category || 'General'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -881,6 +946,7 @@
                         <li><a href="#menu" class="text-gray-400 hover:text-white transition-colors">Menu</a></li>
                         <li><a href="#catering" class="text-gray-400 hover:text-white transition-colors">Catering</a></li>
                         <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">About</a></li>
+                        <li><a href="#blog" class="text-gray-400 hover:text-white transition-colors">Blog</a></li>
                     </ul>
                 </div>
                 
