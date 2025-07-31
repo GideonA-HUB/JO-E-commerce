@@ -237,6 +237,133 @@
                     </div>
                 </div>
 
+                <!-- Newsletter Analytics Grid -->
+                {% if is_owner %}
+                <div class="mb-8">
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">Newsletter Analytics</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                        <!-- Total Subscribers -->
+                        <div class="card p-6 text-center">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-envelope text-2xl text-green-600"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ total_subscribers|default:"0" }}</h3>
+                            <p class="text-gray-600 mb-2">Total Subscribers</p>
+                            <span class="text-green-600 text-sm font-semibold">All Time</span>
+                        </div>
+
+                        <!-- Active Subscribers -->
+                        <div class="card p-6 text-center">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-user-check text-2xl text-blue-600"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ active_subscribers|default:"0" }}</h3>
+                            <p class="text-gray-600 mb-2">Active Subscribers</p>
+                            <span class="text-blue-600 text-sm font-semibold">Currently Subscribed</span>
+                        </div>
+
+                        <!-- Total Campaigns -->
+                        <div class="card p-6 text-center">
+                            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-bullhorn text-2xl text-purple-600"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ total_campaigns|default:"0" }}</h3>
+                            <p class="text-gray-600 mb-2">Total Campaigns</p>
+                            <span class="text-purple-600 text-sm font-semibold">Created</span>
+                        </div>
+
+                        <!-- Sent Campaigns -->
+                        <div class="card p-6 text-center">
+                            <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-paper-plane text-2xl text-orange-600"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ sent_campaigns|default:"0" }}</h3>
+                            <p class="text-gray-600 mb-2">Sent Campaigns</p>
+                            <span class="text-orange-600 text-sm font-semibold">Delivered</span>
+                        </div>
+                    </div>
+
+                    <!-- Newsletter Recent Activity -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <!-- Recent Subscribers -->
+                        <div class="card p-6">
+                            <h4 class="text-xl font-semibold text-gray-900 mb-4">Recent Subscribers</h4>
+                            {% if recent_subscribers %}
+                                <div class="space-y-3">
+                                    {% for subscriber in recent_subscribers %}
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-900">{{ subscriber.email }}</p>
+                                            {% if subscriber.first_name or subscriber.last_name %}
+                                                <p class="text-sm text-gray-600">{{ subscriber.first_name }} {{ subscriber.last_name }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-xs text-gray-500">{{ subscriber.subscribed_at|date:"M d, Y" }}</span>
+                                            <div class="mt-1">
+                                                <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                                    {% if subscriber.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                                    {% if subscriber.is_active %}Active{% else %}Inactive{% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="mt-4 text-center">
+                                    <a href="/admin/api/newslettersubscriber/" class="btn-primary">
+                                        <i class="fas fa-eye mr-2"></i>
+                                        View All Subscribers
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-8">
+                                    <i class="fas fa-envelope text-4xl text-gray-300 mb-4"></i>
+                                    <p class="text-gray-500">No subscribers yet. Subscribers will appear here once they sign up.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Recent Campaigns -->
+                        <div class="card p-6">
+                            <h4 class="text-xl font-semibold text-gray-900 mb-4">Recent Campaigns</h4>
+                            {% if recent_campaigns %}
+                                <div class="space-y-3">
+                                    {% for campaign in recent_campaigns %}
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div class="flex-1">
+                                            <p class="font-medium text-gray-900">{{ campaign.title }}</p>
+                                            <p class="text-sm text-gray-600">{{ campaign.subject }}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-xs text-gray-500">{{ campaign.created_at|date:"M d, Y" }}</span>
+                                            <div class="mt-1">
+                                                <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                                    {% if campaign.status == 'sent' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                                    {{ campaign.status|title }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="mt-4 text-center">
+                                    <a href="/admin/api/newslettercampaign/" class="btn-primary">
+                                        <i class="fas fa-eye mr-2"></i>
+                                        View All Campaigns
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-8">
+                                    <i class="fas fa-bullhorn text-4xl text-gray-300 mb-4"></i>
+                                    <p class="text-gray-500">No campaigns yet. Create your first newsletter campaign.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Recent Orders Section -->
                 {% if is_owner %}
                 <div class="card p-8 mb-8">
@@ -342,6 +469,17 @@
                             </div>
                         </a>
                         
+                        {% if is_owner %}
+                        <a href="/admin/api/newslettercampaign/" class="group">
+                            <div class="p-6 border-2 border-gray-200 rounded-lg hover:border-primary-300 transition-colors">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-200 transition-colors">
+                                    <i class="fas fa-envelope text-xl text-green-600"></i>
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Manage Newsletter</h4>
+                                <p class="text-gray-600 text-sm">Create and send email campaigns</p>
+                            </div>
+                        </a>
+                        {% else %}
                         <a href="#" class="group">
                             <div class="p-6 border-2 border-gray-200 rounded-lg hover:border-primary-300 transition-colors">
                                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
@@ -351,6 +489,7 @@
                                 <p class="text-gray-600 text-sm">Configure your restaurant settings</p>
                             </div>
                         </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

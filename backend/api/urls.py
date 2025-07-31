@@ -11,6 +11,8 @@ router.register(r'wishlist', views.WishlistViewSet)
 router.register(r'product-ratings', views.ProductRatingViewSet)
 router.register(r'product-comments', views.ProductCommentViewSet)
 router.register(r'blog', views.BlogPostViewSet)
+router.register(r'newsletter-subscribers', views.NewsletterSubscriberViewSet)
+router.register(r'newsletter-campaigns', views.NewsletterCampaignViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

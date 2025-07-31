@@ -123,6 +123,16 @@ def dashboard_view(request):
         context['is_owner'] = True
         staff_members = UserProfile.objects.filter(role__in=['staff', 'owner'])
         context['staff_count'] = staff_members.count()
+        
+        # Newsletter statistics
+        from api.models import NewsletterSubscriber, NewsletterCampaign
+        context['total_subscribers'] = NewsletterSubscriber.objects.count()
+        context['active_subscribers'] = NewsletterSubscriber.objects.filter(is_active=True).count()
+        context['total_campaigns'] = NewsletterCampaign.objects.count()
+        context['sent_campaigns'] = NewsletterCampaign.objects.filter(status='sent').count()
+        context['recent_subscribers'] = NewsletterSubscriber.objects.order_by('-subscribed_at')[:5]
+        context['recent_campaigns'] = NewsletterCampaign.objects.order_by('-created_at')[:5]
+        
     elif profile.role == 'staff':
         context['total_contacts'] = ContactMessage.objects.count()
         context['unread_contacts'] = ContactMessage.objects.filter(status='new').count()
@@ -134,6 +144,16 @@ def dashboard_view(request):
         context['is_owner'] = False
         staff_members = UserProfile.objects.filter(role__in=['staff', 'owner'])
         context['staff_count'] = staff_members.count()
+        
+        # Newsletter statistics for staff
+        from api.models import NewsletterSubscriber, NewsletterCampaign
+        context['total_subscribers'] = NewsletterSubscriber.objects.count()
+        context['active_subscribers'] = NewsletterSubscriber.objects.filter(is_active=True).count()
+        context['total_campaigns'] = NewsletterCampaign.objects.count()
+        context['sent_campaigns'] = NewsletterCampaign.objects.filter(status='sent').count()
+        context['recent_subscribers'] = NewsletterSubscriber.objects.order_by('-subscribed_at')[:5]
+        context['recent_campaigns'] = NewsletterCampaign.objects.order_by('-created_at')[:5]
+        
     else:
         # If a customer tries to access dashboard, send them to main site
         return redirect('main_site')

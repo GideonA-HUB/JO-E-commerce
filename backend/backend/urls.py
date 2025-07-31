@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
+from api.models import SiteSettings
 
 @csrf_exempt
 def api_root(request):
@@ -38,6 +39,15 @@ def main_site(request):
     context = {}
     if request.user.is_authenticated:
         context['user'] = request.user
+    
+    # Get site settings from database
+    try:
+        site_settings = SiteSettings.get_settings()
+        context['site_settings'] = site_settings
+    except:
+        # Fallback to default values if no settings exist
+        context['site_settings'] = None
+    
     return render(request, 'main_site.html', context)
 
 urlpatterns = [

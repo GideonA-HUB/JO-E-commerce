@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment, BlogPost
+from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment, BlogPost, NewsletterSubscriber, NewsletterCampaign, CampaignRecipient
+from django.utils import timezone
 
 # Customize admin site
 admin.site.site_header = "CHOPHOUSE Admin"
@@ -230,3 +231,84 @@ class ProductCommentAdmin(admin.ModelAdmin):
     search_fields = ['product__name', 'user__username', 'comment']
 
 admin.site.register(BlogPost)
+
+@admin.register(NewsletterSubscriber)
+class NewsletterSubscriberAdmin(admin.ModelAdmin):
+    list_display = ['email', 'first_name', 'last_name', 'is_active', 'subscribed_at']
+    list_filter = ['is_active', 'subscribed_at']
+    search_fields = ['email', 'first_name', 'last_name']
+    readonly_fields = ['subscribed_at', 'unsubscribed_at']
+    list_editable = ['is_active']
+    ordering = ['-subscribed_at']
+    
+    fieldsets = (
+        ('Subscriber Information', {
+            'fields': ('email', 'first_name', 'last_name')
+        }),
+        ('Status', {
+            'fields': ('is_active', 'subscribed_at', 'unsubscribed_at')
+        }),
+    )
+    
+    actions = ['activate_subscribers', 'deactivate_subscribers']
+    
+    def activate_subscribers(self, request, queryset):
+        updated = queryset.update(is_active=True, unsubscribed_at=None)
+        self.message_user(request, f'{updated} subscribers activated.')
+    activate_subscribers.short_description = "Activate selected subscribers"
+    
+    def deactivate_subscribers(self, request, queryset):
+        updated = queryset.update(is_active=False, unsubscribed_at=timezone.now())
+        self.message_user(request, f'{updated} subscribers deactivated.')
+    deactivate_subscribers.short_description = "Deactivate selected subscribers"
+
+@admin.register(NewsletterCampaign)
+class NewsletterCampaignAdmin(admin.ModelAdmin):
+    list_display = ['title', 'subject', 'status', 'created_at', 'sent_at', 'recipient_count']
+    list_filter = ['status', 'created_at', 'sent_at']
+    search_fields = ['title', 'subject', 'content']
+    readonly_fields = ['created_at', 'sent_at']
+    list_editable = ['status']
+    ordering = ['-created_at']
+    
+    fieldsets = (
+        ('Campaign Information', {
+            'fields': ('title', 'subject', 'content')
+        }),
+        ('Status', {
+            'fields': ('status', 'created_at', 'sent_at')
+        }),
+    )
+    
+    actions = ['send_campaigns']
+    
+    def recipient_count(self, obj):
+        return obj.recipients.filter(is_active=True).count()
+    recipient_count.short_description = 'Active Recipients'
+    
+    def send_campaigns(self, request, queryset):
+        for campaign in queryset:
+            if campaign.status == 'draft':
+                # This would integrate with your email service
+                campaign.status = 'sent'
+                campaign.sent_at = timezone.now()
+                campaign.save()
+        self.message_user(request, f'{queryset.count()} campaigns marked as sent.')
+    send_campaigns.short_description = "Mark selected campaigns as sent"
+
+@admin.register(CampaignRecipient)
+class CampaignRecipientAdmin(admin.ModelAdmin):
+    list_display = ['campaign', 'subscriber', 'sent_at', 'opened', 'clicked']
+    list_filter = ['campaign', 'opened', 'clicked', 'sent_at']
+    search_fields = ['campaign__title', 'subscriber__email']
+    readonly_fields = ['sent_at']
+    ordering = ['-sent_at']
+    
+    fieldsets = (
+        ('Campaign Details', {
+            'fields': ('campaign', 'subscriber')
+        }),
+        ('Tracking', {
+            'fields': ('sent_at', 'opened', 'clicked')
+        }),
+    )

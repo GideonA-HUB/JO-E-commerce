@@ -12,14 +12,16 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import stripe
 import json
-from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment, BlogPost
+from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment, BlogPost, NewsletterSubscriber, NewsletterCampaign, CampaignRecipient
 from .serializers import (
     ProductSerializer, OrderSerializer, CreateOrderSerializer,
     SiteSettingsSerializer, CateringServiceSerializer, ContactMessageSerializer,
     ProductReviewSerializer, CreateProductReviewSerializer, WishlistSerializer, CreateWishlistSerializer,
     ProductRatingSerializer, CreateProductRatingSerializer, ProductCommentSerializer, CreateProductCommentSerializer,
-    BlogPostSerializer
+    BlogPostSerializer, NewsletterSubscriberSerializer, NewsletterCampaignSerializer
 )
+from django.utils import timezone
+from rest_framework import serializers
 
 # Configure Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -27,7 +29,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 # Create your views here.
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Product.objects.filter(is_available=True)
+    queryset = Product.objects.all()  # Removed is_available=True filter
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     pagination_class = None
@@ -94,7 +96,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 class CateringServiceViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = CateringService.objects.filter(is_active=True)
+    queryset = CateringService.objects.all()  # Removed is_active=True filter
     serializer_class = CateringServiceSerializer
     permission_classes = [AllowAny]
     pagination_class = None
@@ -278,14 +280,53 @@ class WishlistViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['post'])
-    def remove_item(self, request):
-        customer_email = request.data.get('customer_email')
+    def add_item(self, request):
+        customer_email = request.data.get('user_email')
         product_id = request.data.get('product')
         
         if customer_email and product_id:
             try:
-                wishlist_item = self.queryset.get(
+                # Check if item already exists
+                existing_item = self.queryset.filter(
                     customer_email=customer_email,
+                    product_id=product_id
+                ).first()
+                
+                if existing_item:
+                    return Response({
+                        'success': True,
+                        'message': 'Item already in wishlist!'
+                    })
+                
+                # Create new wishlist item
+                wishlist_item = self.queryset.create(
+                    customer_email=customer_email,
+                    product_id=product_id
+                )
+                
+                return Response({
+                    'success': True,
+                    'message': 'Item added to wishlist!'
+                }, status=status.HTTP_201_CREATED)
+                
+            except Exception as e:
+                return Response({
+                    'error': f'Failed to add item to wishlist: {str(e)}'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({
+            'error': 'Customer email and product ID required'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def remove_item(self, request):
+        user_email = request.data.get('user_email')
+        product_id = request.data.get('product')
+        
+        if user_email and product_id:
+            try:
+                wishlist_item = self.queryset.get(
+                    customer_email=user_email,
                     product_id=product_id
                 )
                 wishlist_item.delete()
@@ -299,12 +340,12 @@ class WishlistViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_404_NOT_FOUND)
         
         return Response({
-            'error': 'Customer email and product ID required'
+            'error': 'User email and product ID required'
         }, status=status.HTTP_400_BAD_REQUEST)
 
 class ProductRatingViewSet(viewsets.ModelViewSet):
     queryset = ProductRating.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -312,7 +353,16 @@ class ProductRatingViewSet(viewsets.ModelViewSet):
         return ProductRatingSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        # Handle case where user is not authenticated
+        if self.request.user.is_authenticated:
+            serializer.save(user=self.request.user, user_email=self.request.user.email)
+        else:
+            # For unauthenticated users, use user_email from request data
+            user_email = self.request.data.get('user_email')
+            if user_email:
+                serializer.save(user=None, user_email=user_email)
+            else:
+                raise serializers.ValidationError("user_email is required for unauthenticated users")
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -323,7 +373,7 @@ class ProductRatingViewSet(viewsets.ModelViewSet):
 
 class ProductCommentViewSet(viewsets.ModelViewSet):
     queryset = ProductComment.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -331,7 +381,16 @@ class ProductCommentViewSet(viewsets.ModelViewSet):
         return ProductCommentSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        # Handle case where user is not authenticated
+        if self.request.user.is_authenticated:
+            serializer.save(user=self.request.user, user_email=self.request.user.email)
+        else:
+            # For unauthenticated users, use user_email from request data
+            user_email = self.request.data.get('user_email')
+            if user_email:
+                serializer.save(user=None, user_email=user_email)
+            else:
+                raise serializers.ValidationError("user_email is required for unauthenticated users")
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -346,6 +405,112 @@ class BlogPostViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     pagination_class = None
     lookup_field = 'slug'
+
+class NewsletterSubscriberViewSet(viewsets.ModelViewSet):
+    queryset = NewsletterSubscriber.objects.all()
+    serializer_class = NewsletterSubscriberSerializer
+    permission_classes = [AllowAny]
+    
+    @action(detail=False, methods=['post'])
+    def subscribe(self, request):
+        email = request.data.get('email')
+        first_name = request.data.get('first_name', '')
+        last_name = request.data.get('last_name', '')
+        
+        if not email:
+            return Response({
+                'error': 'Email is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            subscriber, created = NewsletterSubscriber.objects.get_or_create(
+                email=email,
+                defaults={
+                    'first_name': first_name,
+                    'last_name': last_name,
+                    'is_active': True
+                }
+            )
+            
+            if not created and subscriber.is_active:
+                return Response({
+                    'message': 'You are already subscribed to our newsletter!'
+                }, status=status.HTTP_200_OK)
+            
+            if not created and not subscriber.is_active:
+                subscriber.is_active = True
+                subscriber.unsubscribed_at = None
+                subscriber.save()
+                return Response({
+                    'message': 'Welcome back! You have been resubscribed to our newsletter.'
+                }, status=status.HTTP_200_OK)
+            
+            return Response({
+                'message': 'Thank you for subscribing to our newsletter!'
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response({
+                'error': 'Failed to subscribe. Please try again.'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=False, methods=['post'])
+    def unsubscribe(self, request):
+        email = request.data.get('email')
+        
+        if not email:
+            return Response({
+                'error': 'Email is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            subscriber = NewsletterSubscriber.objects.get(email=email)
+            subscriber.is_active = False
+            subscriber.unsubscribed_at = timezone.now()
+            subscriber.save()
+            
+            return Response({
+                'message': 'You have been unsubscribed from our newsletter.'
+            }, status=status.HTTP_200_OK)
+            
+        except NewsletterSubscriber.DoesNotExist:
+            return Response({
+                'error': 'Email not found in our subscribers list.'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+class NewsletterCampaignViewSet(viewsets.ModelViewSet):
+    queryset = NewsletterCampaign.objects.all()
+    serializer_class = NewsletterCampaignSerializer
+    permission_classes = [IsAuthenticated]
+    
+    @action(detail=True, methods=['post'])
+    def send_campaign(self, request, pk=None):
+        campaign = self.get_object()
+        
+        if campaign.status == 'sent':
+            return Response({
+                'error': 'Campaign has already been sent.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get all active subscribers
+        subscribers = NewsletterSubscriber.objects.filter(is_active=True)
+        
+        # Create campaign recipients
+        for subscriber in subscribers:
+            CampaignRecipient.objects.create(
+                campaign=campaign,
+                subscriber=subscriber
+            )
+        
+        # Send emails (this would integrate with your email service)
+        # For now, we'll just mark as sent
+        campaign.status = 'sent'
+        campaign.sent_at = timezone.now()
+        campaign.save()
+        
+        return Response({
+            'message': f'Campaign sent to {subscribers.count()} subscribers.'
+        }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def site_settings(request):

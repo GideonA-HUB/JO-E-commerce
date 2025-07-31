@@ -260,29 +260,33 @@ class ContactMessage(models.Model):
 
 class ProductRating(models.Model):
     product = models.ForeignKey(Product, related_name='ratings', on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user_email = models.EmailField(blank=True, null=True)
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ['product', 'user']
+        unique_together = ['product', 'user_email']
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.user} rated {self.product} ({self.rating})"
+        user_identifier = self.user.username if self.user else self.user_email
+        return f"{user_identifier} - {self.product.name} ({self.rating} stars)"
 
 class ProductComment(models.Model):
     product = models.ForeignKey(Product, related_name='comments', on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user_email = models.EmailField(blank=True, null=True)
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ['product', 'user']
+        unique_together = ['product', 'user_email']
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.user} commented on {self.product}"
+        user_identifier = self.user.username if self.user else self.user_email
+        return f"{user_identifier} - {self.product.name}"
 
 class BlogPost(models.Model):
     CATEGORY_CHOICES = [
@@ -304,3 +308,47 @@ class BlogPost(models.Model):
 
     def __str__(self):
         return self.title
+
+class NewsletterSubscriber(models.Model):
+    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, blank=True)
+    is_active = models.BooleanField(default=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    unsubscribed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-subscribed_at']
+
+    def __str__(self):
+        return self.email
+
+class NewsletterCampaign(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('sent', 'Sent'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    subject = models.CharField(max_length=200)
+    content = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+    sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    recipients = models.ManyToManyField(NewsletterSubscriber, through='CampaignRecipient')
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+class CampaignRecipient(models.Model):
+    campaign = models.ForeignKey(NewsletterCampaign, on_delete=models.CASCADE)
+    subscriber = models.ForeignKey(NewsletterSubscriber, on_delete=models.CASCADE)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    opened = models.BooleanField(default=False)
+    clicked = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ['campaign', 'subscriber']

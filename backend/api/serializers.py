@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment, BlogPost
+from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment, BlogPost, NewsletterSubscriber, NewsletterCampaign, CampaignRecipient
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -110,29 +110,52 @@ class ContactMessageSerializer(serializers.ModelSerializer):
 
 class ProductRatingSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
+    user_email = serializers.EmailField(read_only=True)
+    
     class Meta:
         model = ProductRating
-        fields = ['id', 'product', 'user', 'rating', 'created_at']
-        read_only_fields = ['user', 'created_at']
+        fields = ['id', 'product', 'user', 'user_email', 'rating', 'created_at']
+        read_only_fields = ['user', 'user_email', 'created_at']
 
 class CreateProductRatingSerializer(serializers.ModelSerializer):
+    user_email = serializers.EmailField(required=False)
+    
     class Meta:
         model = ProductRating
-        fields = ['product', 'rating']
+        fields = ['product', 'rating', 'user_email']
 
 class ProductCommentSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
+    user_email = serializers.EmailField(read_only=True)
+    
     class Meta:
         model = ProductComment
-        fields = ['id', 'product', 'user', 'comment', 'created_at']
-        read_only_fields = ['user', 'created_at']
+        fields = ['id', 'product', 'user', 'user_email', 'comment', 'created_at']
+        read_only_fields = ['user', 'user_email', 'created_at']
 
 class CreateProductCommentSerializer(serializers.ModelSerializer):
+    user_email = serializers.EmailField(required=False)
+    
     class Meta:
         model = ProductComment
-        fields = ['product', 'comment'] 
+        fields = ['product', 'comment', 'user_email']
 
 class BlogPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogPost
-        fields = ['id', 'title', 'slug', 'content', 'image', 'author', 'category', 'created_at', 'updated_at'] 
+        fields = ['id', 'title', 'slug', 'content', 'image', 'author', 'category', 'created_at', 'updated_at']
+
+class NewsletterSubscriberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsletterSubscriber
+        fields = ['id', 'email', 'first_name', 'last_name', 'is_active', 'subscribed_at']
+
+class NewsletterCampaignSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsletterCampaign
+        fields = ['id', 'title', 'subject', 'content', 'status', 'sent_at', 'created_at']
+
+class CampaignRecipientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignRecipient
+        fields = ['id', 'campaign', 'subscriber', 'sent_at', 'opened', 'clicked'] 

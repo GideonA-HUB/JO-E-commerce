@@ -32,7 +32,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-50" x-data="app({{ user.is_authenticated|yesno:'true,false' }}, '{{ user.email|escapejs }}')" x-init="init()">
+<body class="bg-gray-50" x-data="app({{ user.is_authenticated|yesno:'true,false' }}, '{{ user.email|escapejs }}', null)" x-init="init()">
     <!-- Navigation -->
     <nav class="bg-white shadow-lg sticky top-0 z-50 backdrop-blur">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,7 +40,7 @@
                 <!-- Logo -->
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <h1 class="text-2xl font-display font-bold text-primary-600">CHOPHOUSE</h1>
+                        <h1 class="text-2xl font-display font-bold text-primary-600 cursor-pointer hover:text-primary-700 transition-colors" onclick="scrollToTop()" title="Go to Home" style="cursor: pointer;">CHOPHOUSE</h1>
                     </div>
                 </div>
 
@@ -147,12 +147,20 @@
                 </p>
             </div>
 
+            <!-- Search Bar -->
+            <div class="max-w-2xl mx-auto mb-8">
+                <div class="relative">
+                    <input type="text" x-model="searchQuery" @input="fetchProducts()" placeholder="Search products by name..." class="w-full px-6 py-4 pl-12 border border-gray-300 rounded-full focus:ring-2 focus:ring-primary-500 focus:border-transparent text-lg">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
+                </div>
+            </div>
+
             <!-- Category Tabs -->
             <div class="flex flex-wrap justify-center gap-4 mb-8">
-                <button @click="activeCategory = 'all'" :class="activeCategory === 'all' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">All Items</button>
-                <button @click="activeCategory = 'finger-foods'" :class="activeCategory === 'finger-foods' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Finger Foods</button>
-                <button @click="activeCategory = 'beverages'" :class="activeCategory === 'beverages' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Beverages</button>
-                <button @click="activeCategory = 'desserts'" :class="activeCategory === 'desserts' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Desserts</button>
+                <button @click="activeCategory = 'all'; selectedCategory = 'all'; fetchProducts()" :class="activeCategory === 'all' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">All Items</button>
+                <button @click="activeCategory = 'finger-foods'; selectedCategory = 'finger-foods'; fetchProducts()" :class="activeCategory === 'finger-foods' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Finger Foods</button>
+                <button @click="activeCategory = 'beverages'; selectedCategory = 'beverages'; fetchProducts()" :class="activeCategory === 'beverages' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Beverages</button>
+                <button @click="activeCategory = 'desserts'; selectedCategory = 'desserts'; fetchProducts()" :class="activeCategory === 'desserts' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Desserts</button>
             </div>
 
             <!-- Search & Filter UI -->
@@ -163,7 +171,7 @@
                         <h3 class="text-lg font-semibold mb-4">Filter Products</h3>
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                            <select x-model="selectedCategory" @change="fetchProducts()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <select x-model="selectedCategory" @change="activeCategory = selectedCategory; fetchProducts()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                                 <template x-for="cat in categories" :key="cat.value">
                                     <option :value="cat.value" x-text="cat.label"></option>
                                 </template>
@@ -173,20 +181,31 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Min Price</label>
                             <input type="number" min="0" x-model="minPrice" @input="fetchProducts()" placeholder="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         </div>
-                        <div>
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Max Price</label>
                             <input type="number" min="0" x-model="maxPrice" @input="fetchProducts()" placeholder="10000" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         </div>
+                        <button @click="searchQuery = ''; selectedCategory = 'all'; activeCategory = 'all'; minPrice = ''; maxPrice = ''; fetchProducts()" class="w-full btn-outline text-sm">
+                            <i class="fas fa-times mr-2"></i>
+                            Clear All Filters
+                        </button>
                     </div>
                 </aside>
                 <!-- Main Content -->
                 <main class="flex-1">
-                    <!-- Search Bar -->
-                    <div class="mb-6 flex items-center gap-4">
-                        <input type="text" x-model="searchQuery" @input.debounce.400ms="fetchProducts()" placeholder="Search products by name or description..." class="w-full px-6 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-lg">
+                    <!-- Loading Indicator -->
+                    <div x-show="loadingProducts" class="text-center py-8">
+                        <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-white transition ease-in-out duration-150">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Loading products...
+                        </div>
                     </div>
+                    
                     <!-- Product Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <div x-show="!loadingProducts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         <template x-for="product in filteredProducts" :key="product.id">
                             <div class="product-card">
                                 <img :src="product.image || 'https://picsum.photos/400/300?random=1'" :alt="product.name" class="w-full h-48 object-cover transition-transform duration-300 hover:scale-110 rounded-lg" @error="event.target.src='https://picsum.photos/400/300?random=1'" />
@@ -319,7 +338,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-                            <input type="email" x-model="contactForm.email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <input type="email" x-model="contactForm.email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" :readonly="isAuthenticated">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
@@ -704,11 +723,11 @@
             </button>
             <span
                 x-show="isAuthenticated"
-                :title="isInWishlist(selectedProduct) ? 'In Wishlist' : 'Add to Wishlist'"
+                :title="isInWishlist(selectedProduct.id) ? 'In Wishlist' : 'Add to Wishlist'"
                 style="position:absolute;top:20px;right:70px;z-index:100;font-size:1.7rem;cursor:pointer;color:#ea580c;"
-                @click.prevent="isInWishlist(selectedProduct) ? removeFromWishlist(selectedProduct) : addToWishlist(selectedProduct)"
+                @click.prevent="isInWishlist(selectedProduct.id) ? removeFromWishlist(selectedProduct.id) : addToWishlist(selectedProduct)"
             >
-                <i :class="isInWishlist(selectedProduct) ? 'fas fa-heart' : 'far fa-heart'"></i>
+                <i :class="isInWishlist(selectedProduct.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
             </span>
             <div style="display:flex;flex-direction:column;gap:1rem;padding:2rem;padding-top:110px;">
                 <div style="display:flex;flex-direction:row;gap:2rem;align-items:flex-start;">
@@ -731,12 +750,12 @@
                         <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.5rem;">
                             <button
                                 :disabled="!isAuthenticated"
-                                :class="[isInWishlist(selectedProduct) ? 'bg-orange-100 border-orange-500 text-orange-500' : 'btn-outline', 'text-base px-4 py-2 flex items-center gap-2']"
-                                @click.prevent="isInWishlist(selectedProduct) ? removeFromWishlist(selectedProduct) : addToWishlist(selectedProduct)"
-                                :title="!isAuthenticated ? 'Login to use wishlist' : (isInWishlist(selectedProduct) ? 'Remove from Wishlist' : 'Add to Wishlist')"
+                                :class="[isInWishlist(selectedProduct.id) ? 'bg-orange-100 border-orange-500 text-orange-500' : 'btn-outline', 'text-base px-4 py-2 flex items-center gap-2']"
+                                @click.prevent="isInWishlist(selectedProduct.id) ? removeFromWishlist(selectedProduct.id) : addToWishlist(selectedProduct)"
+                                :title="!isAuthenticated ? 'Login to use wishlist' : (isInWishlist(selectedProduct.id) ? 'Remove from Wishlist' : 'Add to Wishlist')"
                             >
-                                <i :class="isInWishlist(selectedProduct) ? 'fas fa-heart' : 'far fa-heart'"></i>
-                                <span x-text="isInWishlist(selectedProduct) ? 'In Wishlist' : 'Add to Wishlist'"></span>
+                                <i :class="isInWishlist(selectedProduct.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
+                                <span x-text="isInWishlist(selectedProduct.id) ? 'In Wishlist' : 'Add to Wishlist'"></span>
                             </button>
                             <button @click="addToCart(selectedProduct)" class="btn-primary text-base px-4 py-2 flex items-center gap-2">
                                 <i class="fas fa-plus"></i> Add to Cart
@@ -747,30 +766,62 @@
                 <!-- Customer Reviews Section -->
                 <div style="border-top:1px solid #e5e7eb;padding-top:1.5rem;">
                     <h3 style="font-size:1.25rem;font-weight:bold;margin-bottom:1rem;">Customer Reviews</h3>
+                    
+                    <!-- Existing Reviews -->
+                    <div style="margin-bottom:1.5rem;">
+                        <div x-show="comments.length === 0" style="text-align:center;color:#6b7280;padding:1rem;">
+                            No reviews yet. Be the first to review this product!
+                        </div>
+                        <div x-show="comments.length > 0" style="max-height:200px;overflow-y:auto;">
+                            <template x-for="comment in comments" :key="comment.id">
+                                <div style="border-bottom:1px solid #e5e7eb;padding:0.75rem 0;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+                                        <span style="font-weight:600;color:#374151;" x-text="comment.user_email || 'Anonymous'"></span>
+                                        <span style="font-size:0.75rem;color:#6b7280;" x-text="new Date(comment.created_at).toLocaleDateString()"></span>
+                                    </div>
+                                    <p style="color:#4b5563;font-size:0.875rem;" x-text="comment.comment"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    
                     <div style="background:#f9fafb;border-radius:0.75rem;padding:1.5rem;width:100%;max-width:32rem;margin:auto;">
                         <div x-show="reviewSuccess" style="background:#d1fae5;color:#065f46;padding:0.75rem 1rem;border-radius:0.5rem;margin-bottom:0.75rem;font-weight:600;" x-text="reviewSuccess"></div>
                         <div x-show="reviewError" style="background:#fee2e2;color:#991b1b;padding:0.75rem 1rem;border-radius:0.5rem;margin-bottom:0.75rem;font-weight:600;" x-text="reviewError"></div>
-                        <form @submit.prevent="submitReview" x-data="{ reviewForm: $store.app.reviewForm }">
+                        
+                        <!-- Review Form -->
+                        <div x-show="isAuthenticated">
                             <div style="font-weight:600;margin-bottom:0.5rem;">Write a Review</div>
                             <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
-                                <input type="text" placeholder="Your Name" x-model="reviewForm.name" style="border-radius:0.5rem;border:1px solid #d1d5db;padding:0.5rem 0.75rem;font-size:0.875rem;width:50%;">
-                                <input type="email" placeholder="Your Email" x-model="reviewForm.email" style="border-radius:0.5rem;border:1px solid #d1d5db;padding:0.5rem 0.75rem;font-size:0.875rem;width:50%;">
+                                <input type="text" placeholder="Your Name" x-model="commentName" style="border-radius:0.5rem;border:1px solid #d1d5db;padding:0.5rem 0.75rem;font-size:0.875rem;width:50%;">
+                                <input type="email" placeholder="Your Email" x-model="userEmail" style="border-radius:0.5rem;border:1px solid #d1d5db;padding:0.5rem 0.75rem;font-size:0.875rem;width:50%;" readonly>
                             </div>
                             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
                                 <span style="font-size:0.875rem;">Rating</span>
-                                <template x-for="i in 5">
-                                    <i @mouseenter="reviewForm.hoverRating = i" @mouseleave="reviewForm.hoverRating = 0" @click="reviewForm.rating = i" :class="[i <= (reviewForm.hoverRating || reviewForm.rating) ? 'fas fa-star' : 'far fa-star']" style="color:#fbbf24;font-size:1.125rem;cursor:pointer;"></i>
-                                </template>
-                                <span style="font-size:0.75rem;color:#6b7280;" x-text="reviewForm.rating + ' stars'"></span>
+                                <div style="display:flex;gap:0.25rem;">
+                                    <template x-for="i in 5">
+                                        <i @mouseenter="hoverRating = i" @mouseleave="hoverRating = 0" @click="ratingValue = i" :class="[i <= (hoverRating || ratingValue) ? 'fas fa-star' : 'far fa-star']" style="font-size:1.25rem;cursor:pointer;transition:all 0.2s ease;" :style="i <= (hoverRating || ratingValue) ? 'color: #f59e0b; transform: scale(1.1);' : 'color: #d1d5db;'"></i>
+                                    </template>
+                                </div>
+                                <span style="font-size:0.75rem;color:#6b7280;" x-text="ratingValue + ' stars'"></span>
                             </div>
-                            <textarea placeholder="Share your experience..." x-model="reviewForm.comment" style="width:100%;border-radius:0.5rem;border:1px solid #d1d5db;padding:0.5rem;margin-bottom:0.5rem;font-size:0.875rem;"></textarea>
+                            <textarea placeholder="Share your experience..." x-model="commentText" style="width:100%;border-radius:0.5rem;border:1px solid #d1d5db;padding:0.5rem;margin-bottom:0.5rem;font-size:0.875rem;"></textarea>
                             <div style="display:flex;gap:1rem;margin-top:0.5rem;">
-                                <button type="submit" class="btn-primary flex-1 py-2 flex items-center justify-center gap-2">
-                                    <i class="fas fa-paper-plane"></i> Submit Review
+                                <button type="button" @click="submitReview()" class="btn-primary flex-1 py-2 flex items-center justify-center gap-2" :disabled="commentSubmitting">
+                                    <i class="fas fa-paper-plane"></i> 
+                                    <span x-show="!commentSubmitting">Submit Review</span>
+                                    <span x-show="commentSubmitting">Submitting...</span>
                                 </button>
                                 <button type="button" class="btn-outline flex-1 py-2" @click="closeProductModal()">Cancel</button>
                             </div>
-                        </form>
+                            <div x-show="commentError" class="text-xs text-red-600 mt-1" x-text="commentError"></div>
+                        </div>
+                        
+                        <!-- Login Prompt -->
+                        <div x-show="!isAuthenticated" style="text-align:center;padding:1rem;">
+                            <p style="color:#6b7280;margin-bottom:1rem;">Please log in to leave a review</p>
+                            <a href="/login/" class="btn-primary">Login to Review</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -829,7 +880,7 @@
                                 <div class="text-gray-500 text-sm" x-text="item.product.category"></div>
                                 <div class="text-primary-600 font-bold text-xl" x-text="'₦' + item.product.price"></div>
                             </div>
-                            <button @click="removeFromWishlist(item.product)" class="text-red-500 hover:text-red-700">
+                            <button @click="removeFromWishlist(item.product.id)" class="text-red-500 hover:text-red-700">
                                 <i class="fas fa-heart"></i>
                             </button>
                         </div>
@@ -855,7 +906,7 @@
                         <img :src="blogPost.image || 'https://picsum.photos/400/300?random=3'" :alt="blogPost.title" class="w-full h-48 object-cover rounded-lg mb-6">
                         <h3 class="text-2xl font-semibold text-gray-900 mb-4" x-text="blogPost.title"></h3>
                         <p class="text-gray-600 mb-6" x-text="blogPost.excerpt"></p>
-                        <a href="#" @click="openBlogPostModal(blogPost)" class="btn-primary text-sm">Read More</a>
+                        <a href="#" @click="openBlogPost(blogPost)" class="btn-primary text-sm">Read More</a>
                     </div>
                 </template>
             </div>
@@ -863,7 +914,7 @@
     </section>
 
     <!-- Blog Post Modal -->
-    <div x-show="blogPostModalOpen" x-transition class="fixed inset-0 z-50 overflow-y-auto" style="display: none; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);">
+    <div x-show="blogModalOpen" x-transition class="fixed inset-0 z-50 overflow-y-auto" style="display: none; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);">
         <div class="flex items-center justify-center min-h-screen px-4 py-6">
             <!-- Modal Container - Forced Rectangle with Smaller Size -->
             <div class="bg-white rounded-lg shadow-2xl transform transition-all duration-300 ease-out" 
@@ -871,8 +922,8 @@
                 
                 <!-- Modal Header -->
                 <div class="flex items-center justify-between p-4 border-b border-gray-200">
-                    <h3 class="text-xl font-semibold text-gray-900" x-text="selectedBlogPost?.title" style="word-break: break-word; white-space: normal; max-width: 80%;"></h3>
-                    <button @click="closeBlogPostModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100">
+                    <h3 class="text-xl font-semibold text-gray-900" x-text="selectedPost?.title" style="word-break: break-word; white-space: normal; max-width: 80%;"></h3>
+                    <button @click="closeBlogModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -880,22 +931,22 @@
                 <!-- Modal Content -->
                 <div class="p-4">
                     <!-- Blog Image - Reduced Size -->
-                    <img :src="selectedBlogPost?.image || 'https://picsum.photos/400/300?random=3'" 
-                         :alt="selectedBlogPost?.title" 
+                    <img :src="selectedPost?.image || 'https://picsum.photos/400/300?random=3'" 
+                         :alt="selectedPost?.title" 
                          class="w-full object-contain rounded-lg mb-4" 
                          style="height: 340px; max-height: 340px; object-fit: contain;">
                     
                     <!-- Blog Content -->
                     <div class="prose max-w-none text-gray-600 leading-relaxed" 
-                         x-html="selectedBlogPost?.content?.replace(/\n/g, '<br>')"
+                         x-html="selectedPost?.content?.replace(/\n/g, '<br>')"
                          style="word-break: break-word; white-space: normal; line-height: 1.6; font-size: 14px;">
                     </div>
                     
                     <!-- Blog Meta -->
                     <div class="mt-4 pt-4 border-t border-gray-200">
                         <div class="flex items-center justify-between text-sm text-gray-500">
-                            <span x-text="'By ' + (selectedBlogPost?.author || 'Unknown')"></span>
-                            <span x-text="selectedBlogPost?.category || 'General'"></span>
+                            <span x-text="'By ' + (selectedPost?.author || 'Unknown')"></span>
+                            <span x-text="selectedPost?.category || 'General'"></span>
                         </div>
                     </div>
                 </div>
@@ -905,91 +956,197 @@
 
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <h3 class="text-2xl font-display font-bold text-primary-400 mb-4" x-text="siteSettings?.site_name || 'CHOPHOUSE'"></h3>
-                    <p class="text-gray-400 mb-4" x-text="siteSettings?.tagline || 'Premium finger foods and catering services for all your special occasions.'"></p>
+                <!-- Company Info -->
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="text-2xl font-bold mb-4">CHOPHOUSE</h3>
+                    <p class="text-gray-300 mb-4">Experience the finest dining with our premium menu and exceptional service.</p>
                     <div class="flex space-x-4">
-                        <template x-if="siteSettings?.facebook">
-                            <a :href="siteSettings.facebook" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                        </template>
-                        <template x-if="siteSettings?.instagram">
-                            <a :href="siteSettings.instagram" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
-                                <i class="fab fa-instagram"></i>
-                            </a>
-                        </template>
-                        <template x-if="siteSettings?.twitter">
-                            <a :href="siteSettings.twitter" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
-                                <i class="fab fa-twitter"></i>
-                            </a>
-                        </template>
-                        <template x-if="siteSettings?.tiktok">
-                            <a :href="siteSettings.tiktok" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
-                                <i class="fab fa-tiktok"></i>
-                            </a>
-                        </template>
-                        <template x-if="siteSettings?.youtube">
-                            <a :href="siteSettings.youtube" target="_blank" class="text-gray-400 hover:text-primary-400 transition-colors">
-                                <i class="fab fa-youtube"></i>
-                            </a>
-                        </template>
+                        {% if site_settings.facebook %}
+                        <a href="{{ site_settings.facebook }}" target="_blank" class="text-gray-300 hover:text-white transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        {% endif %}
+                        {% if site_settings.instagram %}
+                        <a href="{{ site_settings.instagram }}" target="_blank" class="text-gray-300 hover:text-white transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        {% endif %}
+                        {% if site_settings.twitter %}
+                        <a href="{{ site_settings.twitter }}" target="_blank" class="text-gray-300 hover:text-white transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        {% endif %}
+                        {% if site_settings.tiktok %}
+                        <a href="{{ site_settings.tiktok }}" target="_blank" class="text-gray-300 hover:text-white transition-colors">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                        {% endif %}
+                        {% if site_settings.youtube %}
+                        <a href="{{ site_settings.youtube }}" target="_blank" class="text-gray-300 hover:text-white transition-colors">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
                 
+                <!-- Quick Links -->
                 <div>
                     <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
                     <ul class="space-y-2">
-                        <li><a href="#home" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
-                        <li><a href="#menu" class="text-gray-400 hover:text-white transition-colors">Menu</a></li>
-                        <li><a href="#catering" class="text-gray-400 hover:text-white transition-colors">Catering</a></li>
-                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">About</a></li>
-                        <li><a href="#blog" class="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#menu" class="text-gray-300 hover:text-white transition-colors">Menu</a></li>
+                        <li><a href="#catering" class="text-gray-300 hover:text-white transition-colors">Catering</a></li>
+                        <li><a href="#blog" class="text-gray-300 hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#contact" class="text-gray-300 hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+
+                    <!-- Terms & Policies -->
+                    <div class="mt-8">
+                        <h4 class="text-lg font-semibold mb-4">Terms & Policies</h4>
+                        <ul class="space-y-2 text-gray-300">
+                            <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Cookie Policy</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Legal Notice</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Services/Menu -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Our Services</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#menu" class="hover:text-white transition-colors">Finger Foods</a></li>
+                        <li><a href="#menu" class="hover:text-white transition-colors">Beverages</a></li>
+                        <li><a href="#menu" class="hover:text-white transition-colors">Desserts</a></li>
+                        <li><a href="#catering" class="hover:text-white transition-colors">Catering Services</a></li>
+                        <li><a href="#catering" class="hover:text-white transition-colors">Event Planning</a></li>
+                        <li><a href="#catering" class="hover:text-white transition-colors">Corporate Events</a></li>
                     </ul>
                 </div>
                 
+                <!-- Contact Information -->
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Services</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Finger Foods</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Event Setup</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Custom Cakes</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Catering</a></li>
+                    <h4 class="text-lg font-semibold mb-4">Contact Info</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        {% if site_settings.phone %}
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-2 text-red-400"></i>
+                            <span>{{ site_settings.phone }}</span>
+                        </li>
+                        {% endif %}
+                        {% if site_settings.email %}
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2 text-red-400"></i>
+                            <span>{{ site_settings.email }}</span>
+                        </li>
+                        {% endif %}
+                        {% if site_settings.address %}
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-red-400"></i>
+                            <span>{{ site_settings.address }}</span>
+                        </li>
+                        {% endif %}
+                        {% if site_settings.hours %}
+                        <li class="flex items-center">
+                            <i class="fas fa-clock mr-2 text-red-400"></i>
+                            <span>{{ site_settings.hours }}</span>
+                        </li>
+                        {% endif %}
                     </ul>
                 </div>
                 
+                <!-- Newsletter Subscription -->
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
-                    <ul class="space-y-2">
-                        <li class="text-gray-400">
-                            <i class="fas fa-phone mr-2"></i>
-                            <span x-text="siteSettings?.phone || '+1 (555) 123-4567'"></span>
-                        </li>
-                        <li class="text-gray-400">
-                            <i class="fas fa-envelope mr-2"></i>
-                            <span x-text="siteSettings?.email || 'info@chophouse.com'"></span>
-                        </li>
-                        <li class="text-gray-400">
-                            <i class="fas fa-map-marker-alt mr-2"></i>
-                            <span x-text="siteSettings?.address || '123 Food Street, Culinary District'"></span>
-                        </li>
-                        <li class="text-gray-400">
-                            <i class="fas fa-clock mr-2"></i>
-                            <span x-text="siteSettings?.hours || 'Mon-Sat: 9AM-9PM'"></span>
-                        </li>
-                    </ul>
+                    <h4 class="text-lg font-semibold mb-4">Newsletter</h4>
+                    <p class="text-gray-300 mb-4">Stay updated with our latest promotions and special offers!</p>
+                    <form @submit.prevent="subscribeToNewsletter" class="space-y-3">
+                        <input 
+                            type="email" 
+                            x-model="newsletterForm.email" 
+                            placeholder="Your email address" 
+                            class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
+                            required
+                        >
+                        <input 
+                            type="text" 
+                            x-model="newsletterForm.firstName" 
+                            placeholder="First name (optional)" 
+                            class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
+                        >
+                        <input 
+                            type="text" 
+                            x-model="newsletterForm.lastName" 
+                            placeholder="Last name (optional)" 
+                            class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
+                        >
+                        <button 
+                            type="submit" 
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md transition-colors"
+                            :disabled="newsletterSubmitting"
+                        >
+                            <span x-show="!newsletterSubmitting">Subscribe</span>
+                            <span x-show="newsletterSubmitting">Subscribing...</span>
+                        </button>
+                    </form>
+                    <div x-show="newsletterMessage" x-text="newsletterMessage" class="mt-2 text-sm" :class="newsletterSuccess ? 'text-green-400' : 'text-red-400'"></div>
                 </div>
             </div>
             
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
-                <p class="text-gray-400">&copy; 2024 <span x-text="siteSettings?.site_name || 'CHOPHOUSE'"></span>. All rights reserved.</p>
+            <!-- Payment Methods -->
+            <div class="mt-10 mb-4">
+                <h4 class="text-lg font-semibold mb-4 text-center">Payment Methods</h4>
+                <p class="text-gray-300 text-center mb-6">We accept all major payment methods for your convenience</p>
+                <div class="flex flex-wrap items-center justify-center gap-6">
+                    <span class="inline-flex items-center"><i class="fab fa-cc-visa text-2xl mr-2"></i>Visa</span>
+                    <span class="inline-flex items-center"><i class="fab fa-cc-mastercard text-2xl mr-2"></i>Mastercard</span>
+                    <span class="inline-flex items-center"><i class="fas fa-credit-card text-2xl mr-2"></i>Verve</span>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 CHOPHOUSE. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <!-- Alpine.js and Custom Scripts -->
-    <script src="{% static 'app.js' %}?v=1.1"></script>
+    <script src="{% static 'app.js' %}?v=1.6"></script>
+
+    <!-- Back to Top Button -->
+    <button 
+        id="backToTop" 
+        style="position: fixed; bottom: 32px; right: 32px; background-color: #dc2626; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none;"
+        onclick="scrollToTop()"
+        title="Back to Top"
+    >
+        <i class="fas fa-chevron-up" style="font-size: 20px;"></i>
+    </button>
+
+    <script>
+        // Back to Top functionality
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Show/hide back to top button based on scroll position
+        document.addEventListener('DOMContentLoaded', function() {
+            const backToTopButton = document.getElementById('backToTop');
+            
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 50) {
+                    backToTopButton.style.display = 'block';
+                } else {
+                    backToTopButton.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+
 </body>
 </html> 
