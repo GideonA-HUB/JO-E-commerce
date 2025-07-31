@@ -1,0 +1,13 @@
+{{ campaign.title }}
+
+{{ campaign.subject }}
+
+{{ campaign.content }}
+
+---
+CHOPHOUSE Newsletter
+
+To unsubscribe from our newsletter, please visit:
+{{ unsubscribe_url }}
+
+© {{ site_name }}. All rights reserved. 

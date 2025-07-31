@@ -1,27 +1,42 @@
-from django.shortcuts import render
-from rest_framework import viewsets, status
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.utils import timezone
+from django.db.models import Sum, Q
+from django.core.validators import MinValueValidator, MaxValueValidator
+from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from django.db.models import Q
-from django.conf import settings
-from django.core.mail import send_mail
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework import serializers
 import stripe
 import json
-from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment, BlogPost, NewsletterSubscriber, NewsletterCampaign, CampaignRecipient
+from decimal import Decimal
+from .models import (
+    Product, Order, OrderItem, CateringService, ProductReview, 
+    Wishlist, ProductRating, ProductComment, BlogPost,
+    NewsletterSubscriber, NewsletterCampaign, CampaignRecipient,
+    SiteSettings, ContactMessage
+)
 from .serializers import (
     ProductSerializer, OrderSerializer, CreateOrderSerializer,
-    SiteSettingsSerializer, CateringServiceSerializer, ContactMessageSerializer,
-    ProductReviewSerializer, CreateProductReviewSerializer, WishlistSerializer, CreateWishlistSerializer,
-    ProductRatingSerializer, CreateProductRatingSerializer, ProductCommentSerializer, CreateProductCommentSerializer,
-    BlogPostSerializer, NewsletterSubscriberSerializer, NewsletterCampaignSerializer
+    CateringServiceSerializer, ProductReviewSerializer, CreateProductReviewSerializer,
+    WishlistSerializer, CreateWishlistSerializer,
+    ProductRatingSerializer, CreateProductRatingSerializer,
+    ProductCommentSerializer, CreateProductCommentSerializer,
+    BlogPostSerializer, NewsletterSubscriberSerializer,
+    NewsletterCampaignSerializer, CampaignRecipientSerializer,
+    SiteSettingsSerializer, ContactMessageSerializer
 )
-from django.utils import timezone
-from rest_framework import serializers
+from accounts.models import UserProfile
 
 # Configure Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -495,21 +510,64 @@ class NewsletterCampaignViewSet(viewsets.ModelViewSet):
         # Get all active subscribers
         subscribers = NewsletterSubscriber.objects.filter(is_active=True)
         
-        # Create campaign recipients
-        for subscriber in subscribers:
-            CampaignRecipient.objects.create(
-                campaign=campaign,
-                subscriber=subscriber
-            )
+        if not subscribers.exists():
+            return Response({
+                'error': 'No active subscribers found.'
+            }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Send emails (this would integrate with your email service)
-        # For now, we'll just mark as sent
+        # Create campaign recipients and send emails
+        sent_count = 0
+        failed_count = 0
+        
+        for subscriber in subscribers:
+            try:
+                # Create campaign recipient record
+                recipient = CampaignRecipient.objects.create(
+                    campaign=campaign,
+                    subscriber=subscriber
+                )
+                
+                # Prepare email context
+                context = {
+                    'campaign': campaign,
+                    'subscriber': subscriber,
+                    'unsubscribe_url': f"{settings.SITE_URL}/api/newsletter-subscribers/unsubscribe/",
+                    'site_name': settings.SITE_NAME,
+                    'site_url': settings.SITE_URL
+                }
+                
+                # Render email template
+                html_message = render_to_string('email/newsletter_campaign.html', context)
+                plain_message = render_to_string('email/newsletter_campaign.txt', context)
+                
+                # Send email
+                send_mail(
+                    subject=campaign.subject,
+                    message=plain_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[subscriber.email],
+                    html_message=html_message,
+                    fail_silently=False
+                )
+                
+                # Mark as sent
+                recipient.sent_at = timezone.now()
+                recipient.save()
+                sent_count += 1
+                
+            except Exception as e:
+                print(f"Failed to send email to {subscriber.email}: {e}")
+                failed_count += 1
+        
+        # Update campaign status
         campaign.status = 'sent'
         campaign.sent_at = timezone.now()
         campaign.save()
         
         return Response({
-            'message': f'Campaign sent to {subscribers.count()} subscribers.'
+            'message': f'Campaign sent successfully! {sent_count} emails sent, {failed_count} failed.',
+            'sent_count': sent_count,
+            'failed_count': failed_count
         }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])

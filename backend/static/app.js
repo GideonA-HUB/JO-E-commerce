@@ -555,7 +555,7 @@ document.addEventListener('alpine:init', () => {
 
             try {
                 const csrfToken = this.getCookie('csrftoken');
-                const res = await fetch('/api/newsletter/subscribe/', {
+                const res = await fetch('/api/newsletter-subscribers/subscribe/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -567,7 +567,7 @@ document.addEventListener('alpine:init', () => {
                 if (res.ok) {
                     this.newsletterSuccess = true;
                     this.newsletterMessage = 'Successfully subscribed to newsletter!';
-                    this.newsletterForm = { email: '', name: '' };
+                    this.newsletterForm = { email: '', firstName: '', lastName: '' };
                 } else {
                     const error = await res.json();
                     this.newsletterMessage = error.detail || 'Error subscribing to newsletter';

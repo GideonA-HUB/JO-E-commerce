@@ -1,7 +1,14 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Product, Order, OrderItem, SiteSettings, CateringService, ContactMessage, ProductReview, Wishlist, ProductRating, ProductComment, BlogPost, NewsletterSubscriber, NewsletterCampaign, CampaignRecipient
 from django.utils import timezone
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+from .models import (
+    Product, CateringService, ContactMessage, Order, OrderItem, 
+    ProductReview, Wishlist, ProductRating, ProductComment, BlogPost,
+    NewsletterSubscriber, NewsletterCampaign, CampaignRecipient, SiteSettings
+)
 
 # Customize admin site
 admin.site.site_header = "CHOPHOUSE Admin"
@@ -287,14 +294,74 @@ class NewsletterCampaignAdmin(admin.ModelAdmin):
     recipient_count.short_description = 'Active Recipients'
     
     def send_campaigns(self, request, queryset):
+        sent_count = 0
+        failed_count = 0
+        
         for campaign in queryset:
             if campaign.status == 'draft':
-                # This would integrate with your email service
-                campaign.status = 'sent'
-                campaign.sent_at = timezone.now()
-                campaign.save()
-        self.message_user(request, f'{queryset.count()} campaigns marked as sent.')
-    send_campaigns.short_description = "Mark selected campaigns as sent"
+                try:
+                    # Get active subscribers
+                    subscribers = NewsletterSubscriber.objects.filter(is_active=True)
+                    
+                    if not subscribers.exists():
+                        self.message_user(request, f'Campaign "{campaign.title}" skipped: No active subscribers.')
+                        continue
+                    
+                    # Send emails to each subscriber
+                    for subscriber in subscribers:
+                        try:
+                            # Create campaign recipient record
+                            recipient = CampaignRecipient.objects.create(
+                                campaign=campaign,
+                                subscriber=subscriber
+                            )
+                            
+                            # Prepare email context
+                            context = {
+                                'campaign': campaign,
+                                'subscriber': subscriber,
+                                'unsubscribe_url': f"{settings.SITE_URL}/api/newsletter-subscribers/unsubscribe/",
+                                'site_name': settings.SITE_NAME,
+                                'site_url': settings.SITE_URL
+                            }
+                            
+                            # Render email template
+                            html_message = render_to_string('email/newsletter_campaign.html', context)
+                            plain_message = render_to_string('email/newsletter_campaign.txt', context)
+                            
+                            # Send email
+                            send_mail(
+                                subject=campaign.subject,
+                                message=plain_message,
+                                from_email=settings.DEFAULT_FROM_EMAIL,
+                                recipient_list=[subscriber.email],
+                                html_message=html_message,
+                                fail_silently=False
+                            )
+                            
+                            # Mark as sent
+                            recipient.sent_at = timezone.now()
+                            recipient.save()
+                            
+                        except Exception as e:
+                            print(f"Failed to send email to {subscriber.email}: {e}")
+                            failed_count += 1
+                    
+                    # Update campaign status
+                    campaign.status = 'sent'
+                    campaign.sent_at = timezone.now()
+                    campaign.save()
+                    sent_count += 1
+                    
+                except Exception as e:
+                    print(f"Failed to send campaign {campaign.title}: {e}")
+                    failed_count += 1
+        
+        if sent_count > 0:
+            self.message_user(request, f'{sent_count} campaigns sent successfully! {failed_count} emails failed.')
+        else:
+            self.message_user(request, f'No campaigns were sent. {failed_count} errors occurred.')
+    send_campaigns.short_description = "Send selected campaigns to subscribers"
 
 @admin.register(CampaignRecipient)
 class CampaignRecipientAdmin(admin.ModelAdmin):

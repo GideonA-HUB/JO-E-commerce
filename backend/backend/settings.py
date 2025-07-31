@@ -185,3 +185,4 @@ DEFAULT_FROM_EMAIL = 'gideonamienz24@gmail.com'  # Your Gmail address
 # Email notification settings
 ADMIN_EMAIL = 'gideonamienz24@gmail.com'  # Email where you want to receive notifications
 SITE_NAME = 'CHOPHOUSE'  # Your restaurant name for email subjects
+SITE_URL = 'http://127.0.0.1:8000'  # Your site URL for unsubscribe links
