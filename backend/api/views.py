@@ -20,6 +20,9 @@ from rest_framework import serializers
 import stripe
 import json
 from decimal import Decimal
+
+# Configure Stripe
+stripe.api_key = settings.STRIPE_SECRET_KEY
 from .models import (
     Product, Order, OrderItem, CateringService, ProductReview, 
     Wishlist, ProductRating, ProductComment, BlogPost,
@@ -37,9 +40,6 @@ from .serializers import (
     SiteSettingsSerializer, ContactMessageSerializer
 )
 from accounts.models import UserProfile
-
-# Configure Stripe
-stripe.api_key = settings.STRIPE_SECRET_KEY
 
 # Create your views here.
 
@@ -130,31 +130,50 @@ class OrderViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             order = serializer.save()
             
-            # Create Stripe Payment Intent
-            try:
-                payment_intent = stripe.PaymentIntent.create(
-                    amount=int(order.total_amount * 100),  # Convert to cents
-                    currency='ngn',  # Nigerian Naira
-                    metadata={
-                        'order_id': order.id,
-                        'customer_email': order.email
-                    }
-                )
-                
-                order.stripe_payment_intent_id = payment_intent.id
+            # Check if Stripe is properly configured
+            stripe_configured = (
+                settings.STRIPE_PUBLISHABLE_KEY != 'pk_test_your_stripe_publishable_key_here' and
+                settings.STRIPE_SECRET_KEY != 'sk_test_your_stripe_secret_key_here'
+            )
+            
+            if stripe_configured:
+                # Create Stripe Payment Intent
+                try:
+                    payment_intent = stripe.PaymentIntent.create(
+                        amount=int(order.total_amount * 100),  # Convert to cents
+                        currency='ngn',  # Nigerian Naira
+                        metadata={
+                            'order_id': order.id,
+                            'customer_email': order.email
+                        }
+                    )
+                    
+                    order.stripe_payment_intent_id = payment_intent.id
+                    order.save()
+                    
+                    return Response({
+                        'order': OrderSerializer(order).data,
+                        'client_secret': payment_intent.client_secret,
+                        'publishable_key': settings.STRIPE_PUBLISHABLE_KEY
+                    }, status=status.HTTP_201_CREATED)
+                    
+                except stripe.error.StripeError as e:
+                    order.delete()  # Delete order if payment intent creation fails
+                    return Response({
+                        'error': str(e)
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                # Test mode - create order without Stripe
+                order.status = 'pending'
                 order.save()
                 
                 return Response({
                     'order': OrderSerializer(order).data,
-                    'client_secret': payment_intent.client_secret,
-                    'publishable_key': settings.STRIPE_PUBLISHABLE_KEY
+                    'client_secret': 'test_client_secret',
+                    'publishable_key': 'pk_test_placeholder',
+                    'test_mode': True,
+                    'message': 'Order created in test mode. Stripe not configured.'
                 }, status=status.HTTP_201_CREATED)
-                
-            except stripe.error.StripeError as e:
-                order.delete()  # Delete order if payment intent creation fails
-                return Response({
-                    'error': str(e)
-                }, status=status.HTTP_400_BAD_REQUEST)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -163,52 +182,92 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = self.get_object()
         payment_intent_id = request.data.get('payment_intent_id')
         
-        if payment_intent_id and payment_intent_id == order.stripe_payment_intent_id:
-            try:
-                payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
-                if payment_intent.status == 'succeeded':
-                    order.status = 'confirmed'
-                    order.save()
-                    
-                    # Send confirmation email
-                    try:
-                        send_mail(
-                            subject=f'Order Confirmed - {settings.SITE_NAME}',
-                            message=f'''
-                            Thank you for your order!
-                            
-                            Order #: {order.id}
-                            Total: ₦{order.total_amount}
-                            
-                            We'll start preparing your order right away.
-                            You'll receive updates on your order status.
-                            
-                            Best regards,
-                            {settings.SITE_NAME} Team
-                            ''',
-                            from_email=settings.DEFAULT_FROM_EMAIL,
-                            recipient_list=[order.email],
-                            fail_silently=True
-                        )
-                    except Exception as e:
-                        print(f"Failed to send confirmation email: {e}")
-                    
-                    return Response({
-                        'success': True,
-                        'message': 'Payment confirmed and order placed successfully!'
-                    })
-                else:
-                    return Response({
-                        'error': 'Payment not completed'
-                    }, status=status.HTTP_400_BAD_REQUEST)
-            except stripe.error.StripeError as e:
-                return Response({
-                    'error': str(e)
-                }, status=status.HTTP_400_BAD_REQUEST)
+        # Check if Stripe is properly configured
+        stripe_configured = (
+            settings.STRIPE_PUBLISHABLE_KEY != 'pk_test_your_stripe_publishable_key_here' and
+            settings.STRIPE_SECRET_KEY != 'sk_test_your_stripe_secret_key_here'
+        )
         
-        return Response({
-            'error': 'Invalid payment intent'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        if stripe_configured:
+            if payment_intent_id and payment_intent_id == order.stripe_payment_intent_id:
+                try:
+                    payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+                    if payment_intent.status == 'succeeded':
+                        order.status = 'confirmed'
+                        order.save()
+                        
+                        # Send confirmation email
+                        try:
+                            send_mail(
+                                subject=f'Order Confirmed - {settings.SITE_NAME}',
+                                message=f'''
+                                Thank you for your order!
+                                
+                                Order #: {order.id}
+                                Total: ₦{order.total_amount}
+                                
+                                We'll start preparing your order right away.
+                                You'll receive updates on your order status.
+                                
+                                Best regards,
+                                {settings.SITE_NAME} Team
+                                ''',
+                                from_email=settings.DEFAULT_FROM_EMAIL,
+                                recipient_list=[order.email],
+                                fail_silently=True
+                            )
+                        except Exception as e:
+                            print(f"Failed to send confirmation email: {e}")
+                        
+                        return Response({
+                            'success': True,
+                            'message': 'Payment confirmed and order placed successfully!'
+                        })
+                    else:
+                        return Response({
+                            'error': 'Payment not completed'
+                        }, status=status.HTTP_400_BAD_REQUEST)
+                except stripe.error.StripeError as e:
+                    return Response({
+                        'error': str(e)
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            return Response({
+                'error': 'Invalid payment intent'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # Test mode - confirm order without Stripe
+            order.status = 'confirmed'
+            order.save()
+            
+            # Send confirmation email
+            try:
+                send_mail(
+                    subject=f'Order Confirmed - {settings.SITE_NAME}',
+                    message=f'''
+                    Thank you for your order!
+                    
+                    Order #: {order.id}
+                    Total: ₦{order.total_amount}
+                    
+                    We'll start preparing your order right away.
+                    You'll receive updates on your order status.
+                    
+                    Best regards,
+                    {settings.SITE_NAME} Team
+                    ''',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[order.email],
+                    fail_silently=True
+                )
+            except Exception as e:
+                print(f"Failed to send confirmation email: {e}")
+            
+            return Response({
+                'success': True,
+                'message': 'Order confirmed in test mode!',
+                'test_mode': True
+            })
 
 class ProductReviewViewSet(viewsets.ModelViewSet):
     queryset = ProductReview.objects.all()

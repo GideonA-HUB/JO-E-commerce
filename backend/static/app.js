@@ -645,6 +645,161 @@ document.addEventListener('alpine:init', () => {
                 this.contactErrorMessage = 'Network error. Please try again.';
             }
             this.contactSubmitting = false;
+        },
+
+        // Stripe Payment Integration
+        initializeStripe() {
+            if (typeof Stripe !== 'undefined') {
+                this.stripe = Stripe('pk_test_your_stripe_publishable_key_here');
+                this.setupStripeElements();
+            }
+        },
+
+        setupStripeElements() {
+            if (this.stripe) {
+                const elements = this.stripe.elements();
+                this.cardElement = elements.create('card', {
+                    style: {
+                        base: {
+                            fontSize: '16px',
+                            color: '#424770',
+                            '::placeholder': {
+                                color: '#aab7c4',
+                            },
+                        },
+                        invalid: {
+                            color: '#9e2146',
+                        },
+                    },
+                });
+                this.cardElement.mount('#card-element');
+            }
+        },
+
+        async placeOrder() {
+            if (!this.stripe || !this.cardElement) {
+                this.orderError = true;
+                this.orderErrorMessage = 'Payment system not initialized. Please refresh the page.';
+                return;
+            }
+
+            this.paymentProcessing = true;
+            this.orderError = false;
+            this.orderSuccess = false;
+
+            try {
+                // Create order
+                const orderData = {
+                    first_name: this.orderDetails.firstName,
+                    last_name: this.orderDetails.lastName,
+                    email: this.orderDetails.email,
+                    phone: this.orderDetails.phone,
+                    address: this.orderDetails.address,
+                    city: this.orderDetails.city,
+                    state: this.orderDetails.state,
+                    zip_code: this.orderDetails.zipCode,
+                    total_amount: this.cartTotal,
+                    items: this.cart.map(item => ({
+                        product_id: item.id,
+                        quantity: item.quantity
+                    }))
+                };
+
+                const csrfToken = this.getCookie('csrftoken');
+                const orderResponse = await fetch('/api/orders/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                const orderResult = await orderResponse.json();
+
+                if (!orderResponse.ok) {
+                    throw new Error(orderResult.error || 'Failed to create order');
+                }
+
+                // Confirm payment with Stripe
+                const { error, paymentIntent } = await this.stripe.confirmCardPayment(
+                    orderResult.client_secret,
+                    {
+                        payment_method: {
+                            card: this.cardElement,
+                            billing_details: {
+                                name: `${this.orderDetails.firstName} ${this.orderDetails.lastName}`,
+                                email: this.orderDetails.email,
+                                address: {
+                                    line1: this.orderDetails.address,
+                                    city: this.orderDetails.city,
+                                    state: this.orderDetails.state,
+                                    postal_code: this.orderDetails.zipCode,
+                                }
+                            }
+                        }
+                    }
+                );
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                if (paymentIntent.status === 'succeeded') {
+                    // Confirm payment on backend
+                    const confirmResponse = await fetch(`/api/orders/${orderResult.order.id}/confirm_payment/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({
+                            payment_intent_id: paymentIntent.id
+                        })
+                    });
+
+                    const confirmResult = await confirmResponse.json();
+
+                    if (confirmResponse.ok && confirmResult.success) {
+                        this.orderSuccess = true;
+                        this.orderDetails = orderResult.order;
+                        this.cart = [];
+                        this.checkoutOpen = false;
+                        this.checkoutStep = 'cart';
+                    } else {
+                        throw new Error(confirmResult.error || 'Payment confirmation failed');
+                    }
+                } else {
+                    throw new Error('Payment was not completed');
+                }
+
+            } catch (error) {
+                this.orderError = true;
+                this.orderErrorMessage = error.message;
+            }
+
+            this.paymentProcessing = false;
+        },
+
+        nextCheckoutStep() {
+            if (this.checkoutStep === 'cart') {
+                this.checkoutStep = 'customer-info';
+            } else if (this.checkoutStep === 'customer-info') {
+                this.checkoutStep = 'delivery-info';
+            } else if (this.checkoutStep === 'delivery-info') {
+                this.checkoutStep = 'payment';
+                this.initializeStripe();
+            }
+        },
+
+        prevCheckoutStep() {
+            if (this.checkoutStep === 'payment') {
+                this.checkoutStep = 'delivery-info';
+            } else if (this.checkoutStep === 'delivery-info') {
+                this.checkoutStep = 'customer-info';
+            } else if (this.checkoutStep === 'customer-info') {
+                this.checkoutStep = 'cart';
+            }
         }
     }));
 }); 
