@@ -21,10 +21,10 @@ document.addEventListener('alpine:init', () => {
         ],
         
         siteSettings: siteSettings || {
-            site_name: 'CHOPHOUSE',
+            site_name: 'TASTY FINGERS',
             tagline: 'Premium finger foods and catering services for all your special occasions.',
             phone: '+1 (555) 123-4567',
-            email: 'info@chophouse.com',
+            email: 'info@tastyfingers.com',
             address: '123 Food Street, Culinary District',
             hours: 'Mon-Sat: 9AM-9PM',
         },
@@ -38,8 +38,27 @@ document.addEventListener('alpine:init', () => {
 
         // Checkout functionality
         checkoutOpen: false,
-        checkoutStep: 'cart',
-        orderDetails: {},
+        checkoutStep: 1,
+        orderDetails: {
+            customerInfo: {
+                firstName: '',
+                lastName: '',
+                email: '',
+                phone: ''
+            },
+            deliveryInfo: {
+                address: '',
+                city: '',
+                state: '',
+                zipCode: '',
+                instructions: ''
+            }
+        },
+        paymentProcessing: false,
+        orderSuccess: false,
+        orderError: false,
+        orderErrorMessage: '',
+        orderSuccessMessage: '',
 
         // Product modal
         selectedProduct: null,
@@ -221,6 +240,18 @@ document.addEventListener('alpine:init', () => {
         checkout() {
             this.checkoutOpen = true;
             this.cartOpen = false;
+            this.checkoutStep = 1;
+            
+            // Initialize order details with user information if available
+            if (this.isAuthenticated && this.userEmail) {
+                this.orderDetails.customerInfo.email = this.userEmail;
+            }
+            
+            // Reset order status
+            this.orderSuccess = false;
+            this.orderError = false;
+            this.orderErrorMessage = '';
+            this.orderSuccessMessage = '';
         },
 
         // Product modal methods
@@ -647,39 +678,62 @@ document.addEventListener('alpine:init', () => {
             this.contactSubmitting = false;
         },
 
-        // Stripe Payment Integration
-        initializeStripe() {
-            if (typeof Stripe !== 'undefined') {
-                this.stripe = Stripe('pk_test_your_stripe_publishable_key_here');
-                this.setupStripeElements();
+        // Paystack Payment Integration
+        initializePaystack() {
+            if (typeof PaystackPop !== 'undefined') {
+                this.paystack = PaystackPop.setup({
+                    key: '{{ paystack_public_key }}',
+                    email: this.orderDetails.customerInfo.email,
+                    amount: this.cartTotal * 100, // Convert to kobo
+                    currency: 'NGN',
+                    callback: (response) => {
+                        this.handlePaystackSuccess(response);
+                    },
+                    onClose: () => {
+                        this.handlePaystackClose();
+                    }
+                });
             }
         },
 
-        setupStripeElements() {
-            if (this.stripe) {
-                const elements = this.stripe.elements();
-                this.cardElement = elements.create('card', {
-                    style: {
-                        base: {
-                            fontSize: '16px',
-                            color: '#424770',
-                            '::placeholder': {
-                                color: '#aab7c4',
-                            },
-                        },
-                        invalid: {
-                            color: '#9e2146',
-                        },
-                    },
-                });
-                this.cardElement.mount('#card-element');
-            }
+        handlePaystackSuccess(response) {
+            // Payment successful
+            this.paymentProcessing = false;
+            this.orderSuccess = true;
+            this.orderSuccessMessage = 'Payment successful! Your order has been placed.';
+            
+            // Clear cart and close checkout
+            this.cart = [];
+            this.checkoutOpen = false;
+            this.checkoutStep = 1;
+            
+            // Show success message
+            alert('Payment successful! Your order has been placed.');
+        },
+
+        handlePaystackClose() {
+            // Payment cancelled
+            this.paymentProcessing = false;
+            this.orderError = true;
+            this.orderErrorMessage = 'Payment was cancelled.';
         },
 
         async placeOrder() {
-            if (!this.stripe || !this.cardElement) {
+            if (!this.orderDetails.customerInfo.firstName || 
+                !this.orderDetails.customerInfo.lastName || 
+                !this.orderDetails.customerInfo.email || 
+                !this.orderDetails.customerInfo.phone) {
                 this.orderError = true;
-                this.orderErrorMessage = 'Payment system not initialized. Please refresh the page.';
+                this.orderErrorMessage = 'Please fill in all customer information.';
+                return;
+            }
+
+            if (!this.orderDetails.deliveryInfo.address || 
+                !this.orderDetails.deliveryInfo.city || 
+                !this.orderDetails.deliveryInfo.state || 
+                !this.orderDetails.deliveryInfo.zipCode) {
+                this.orderError = true;
+                this.orderErrorMessage = 'Please fill in all delivery information.';
                 return;
             }
 
@@ -690,14 +744,14 @@ document.addEventListener('alpine:init', () => {
             try {
                 // Create order
                 const orderData = {
-                    first_name: this.orderDetails.firstName,
-                    last_name: this.orderDetails.lastName,
-                    email: this.orderDetails.email,
-                    phone: this.orderDetails.phone,
-                    address: this.orderDetails.address,
-                    city: this.orderDetails.city,
-                    state: this.orderDetails.state,
-                    zip_code: this.orderDetails.zipCode,
+                    first_name: this.orderDetails.customerInfo.firstName,
+                    last_name: this.orderDetails.customerInfo.lastName,
+                    email: this.orderDetails.customerInfo.email,
+                    phone: this.orderDetails.customerInfo.phone,
+                    address: this.orderDetails.deliveryInfo.address,
+                    city: this.orderDetails.deliveryInfo.city,
+                    state: this.orderDetails.deliveryInfo.state,
+                    zip_code: this.orderDetails.deliveryInfo.zipCode,
                     total_amount: this.cartTotal,
                     items: this.cart.map(item => ({
                         product_id: item.id,
@@ -721,56 +775,17 @@ document.addEventListener('alpine:init', () => {
                     throw new Error(orderResult.error || 'Failed to create order');
                 }
 
-                // Confirm payment with Stripe
-                const { error, paymentIntent } = await this.stripe.confirmCardPayment(
-                    orderResult.client_secret,
-                    {
-                        payment_method: {
-                            card: this.cardElement,
-                            billing_details: {
-                                name: `${this.orderDetails.firstName} ${this.orderDetails.lastName}`,
-                                email: this.orderDetails.email,
-                                address: {
-                                    line1: this.orderDetails.address,
-                                    city: this.orderDetails.city,
-                                    state: this.orderDetails.state,
-                                    postal_code: this.orderDetails.zipCode,
-                                }
-                            }
-                        }
-                    }
-                );
-
-                if (error) {
-                    throw new Error(error.message);
-                }
-
-                if (paymentIntent.status === 'succeeded') {
-                    // Confirm payment on backend
-                    const confirmResponse = await fetch(`/api/orders/${orderResult.order.id}/confirm_payment/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': csrfToken
-                        },
-                        body: JSON.stringify({
-                            payment_intent_id: paymentIntent.id
-                        })
-                    });
-
-                    const confirmResult = await confirmResponse.json();
-
-                    if (confirmResponse.ok && confirmResult.success) {
-                        this.orderSuccess = true;
-                        this.orderDetails = orderResult.order;
-                        this.cart = [];
-                        this.checkoutOpen = false;
-                        this.checkoutStep = 'cart';
-                    } else {
-                        throw new Error(confirmResult.error || 'Payment confirmation failed');
-                    }
+                // Initialize Paystack payment
+                if (orderResult.authorization_url) {
+                    // Redirect to Paystack payment page
+                    window.location.href = orderResult.authorization_url;
                 } else {
-                    throw new Error('Payment was not completed');
+                    // Test mode - simulate success
+                    this.orderSuccess = true;
+                    this.orderSuccessMessage = 'Order placed successfully in test mode!';
+                    this.cart = [];
+                    this.checkoutOpen = false;
+                    this.checkoutStep = 1;
                 }
 
             } catch (error) {
@@ -782,23 +797,19 @@ document.addEventListener('alpine:init', () => {
         },
 
         nextCheckoutStep() {
-            if (this.checkoutStep === 'cart') {
-                this.checkoutStep = 'customer-info';
-            } else if (this.checkoutStep === 'customer-info') {
-                this.checkoutStep = 'delivery-info';
-            } else if (this.checkoutStep === 'delivery-info') {
-                this.checkoutStep = 'payment';
-                this.initializeStripe();
+            if (this.checkoutStep === 1) {
+                this.checkoutStep = 2;
+            } else if (this.checkoutStep === 2) {
+                this.checkoutStep = 3;
+                this.initializePaystack();
             }
         },
 
         prevCheckoutStep() {
-            if (this.checkoutStep === 'payment') {
-                this.checkoutStep = 'delivery-info';
-            } else if (this.checkoutStep === 'delivery-info') {
-                this.checkoutStep = 'customer-info';
-            } else if (this.checkoutStep === 'customer-info') {
-                this.checkoutStep = 'cart';
+            if (this.checkoutStep === 3) {
+                this.checkoutStep = 2;
+            } else if (this.checkoutStep === 2) {
+                this.checkoutStep = 1;
             }
         }
     }));

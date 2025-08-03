@@ -158,10 +158,16 @@ SESSION_COOKIE_DOMAIN = None
 # Use database sessions for better control
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
-# Stripe settings
-STRIPE_PUBLISHABLE_KEY = 'pk_test_your_stripe_publishable_key_here'
-STRIPE_SECRET_KEY = 'sk_test_your_stripe_secret_key_here'
-STRIPE_WEBHOOK_SECRET = 'whsec_your_stripe_webhook_secret_here'
+# Paystack settings (RECOMMENDED for Nigerian businesses)
+# Replace these placeholder keys with your real Paystack API keys
+# Get your keys from: https://dashboard.paystack.com/#/settings/developers
+PAYSTACK_PUBLIC_KEY = 'pk_test_your_paystack_public_key_here'  # Replace with your real public key
+PAYSTACK_SECRET_KEY = 'sk_test_your_paystack_secret_key_here'  # Replace with your real secret key
+PAYSTACK_WEBHOOK_SECRET = 'whsec_your_paystack_webhook_secret_here'  # Replace with your webhook secret
+
+# Payment Gateway Selection
+# Set to 'paystack' for Nigerian business, 'stripe' for international
+PAYMENT_GATEWAY = 'paystack'  # Options: 'paystack', 'stripe', 'flutterwave'
 
 # Development server settings
 if DEBUG:
@@ -184,5 +190,5 @@ DEFAULT_FROM_EMAIL = 'gideonamienz24@gmail.com'  # Your Gmail address
 
 # Email notification settings
 ADMIN_EMAIL = 'gideonamienz24@gmail.com'  # Email where you want to receive notifications
-SITE_NAME = 'CHOPHOUSE'  # Your restaurant name for email subjects
+SITE_NAME = 'TASTY FINGERS'  # Your restaurant name for email subjects
 SITE_URL = 'http://127.0.0.1:8000'  # Your site URL for unsubscribe links

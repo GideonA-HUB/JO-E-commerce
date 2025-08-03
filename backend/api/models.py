@@ -203,7 +203,7 @@ class SiteSettings(models.Model):
             pk=1,
             defaults={
                 'phone': '+1 (555) 123-4567',
-                'email': 'info@chophouse.com',
+                'email': 'info@tastyfingers.com',
                 'address': '123 Food Street, Culinary District',
                 'hours': 'Mon-Sat: 9AM-9PM',
             }

@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             name='SiteSettings',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('site_name', models.CharField(default='CHOPHOUSE', max_length=100)),
+                ('site_name', models.CharField(default='TASTY FINGERS', max_length=100)),
                 ('tagline', models.CharField(blank=True, help_text='Short tagline for the business', max_length=200)),
                 ('phone', models.CharField(blank=True, help_text='Business phone number', max_length=20)),
                 ('email', models.EmailField(blank=True, help_text='Business email address', max_length=254)),

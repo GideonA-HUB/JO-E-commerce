@@ -1,10 +1,10 @@
-# CHOPHOUSE - Premium Finger Foods & Catering
+# TASTY FINGERS - Premium Finger Foods & Catering
 
-A modern, responsive e-commerce website for CHOPHOUSE, a finger foods and catering business. Built with HTML5, CSS3, JavaScript, Tailwind CSS, and Alpine.js.
+A modern, responsive e-commerce website for TASTY FINGERS, a finger foods and catering business. Built with HTML5, CSS3, JavaScript, Tailwind CSS, and Alpine.js.
 
-## 🍽️ About CHOPHOUSE
+## 🍽️ About TASTY FINGERS
 
-CHOPHOUSE specializes in:
+TASTY FINGERS specializes in:
 - **Finger Foods**: Sauced chicken & turkey, mini sandwiches, spring rolls, and more
 - **Beverages**: Yogurt drinks, smoothies, and refreshing beverages
 - **Desserts**: Layered yogurt parfaits, custom cakes, and sweet treats
@@ -41,7 +41,7 @@ CHOPHOUSE specializes in:
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd chophouse-ecommerce
+   cd tastyfingers-ecommerce
    ```
 
 2. **Install dependencies**
@@ -72,7 +72,7 @@ npm run dev
 ## 📁 Project Structure
 
 ```
-chophouse-ecommerce/
+tastyfingers-ecommerce/
 ├── index.html              # Main HTML file
 ├── package.json            # Dependencies and scripts
 ├── tailwind.config.js      # Tailwind CSS configuration
@@ -151,7 +151,7 @@ The website can be deployed to any static hosting service:
 ## 📞 Contact & Support
 
 For questions or support:
-- Email: info@chophouse.com
+- Email: info@tastyfingers.com
 - Phone: +1 (555) 123-4567
 
 ## 📄 License
@@ -176,4 +176,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**CHOPHOUSE** - Making every event delicious! 🍽️✨ 
+**TASTY FINGERS** - Making every event delicious! 🍽️✨ 

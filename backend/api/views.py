@@ -17,12 +17,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import serializers
-import stripe
 import json
 from decimal import Decimal
 
-# Configure Stripe
-stripe.api_key = settings.STRIPE_SECRET_KEY
+# Import Paystack service
+from .paystack_service import PaystackService
 from .models import (
     Product, Order, OrderItem, CateringService, ProductReview, 
     Wishlist, ProductRating, ProductComment, BlogPost,
@@ -130,49 +129,76 @@ class OrderViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             order = serializer.save()
             
-            # Check if Stripe is properly configured
-            stripe_configured = (
-                settings.STRIPE_PUBLISHABLE_KEY != 'pk_test_your_stripe_publishable_key_here' and
-                settings.STRIPE_SECRET_KEY != 'sk_test_your_stripe_secret_key_here'
+            # Check if Paystack is properly configured
+            paystack_configured = (
+                settings.PAYSTACK_PUBLIC_KEY != 'pk_test_your_paystack_public_key_here' and
+                settings.PAYSTACK_SECRET_KEY != 'sk_test_your_paystack_secret_key_here'
             )
             
-            if stripe_configured:
-                # Create Stripe Payment Intent
+            if paystack_configured:
+                # Initialize Paystack transaction
                 try:
-                    payment_intent = stripe.PaymentIntent.create(
-                        amount=int(order.total_amount * 100),  # Convert to cents
-                        currency='ngn',  # Nigerian Naira
-                        metadata={
-                            'order_id': order.id,
-                            'customer_email': order.email
-                        }
-                    )
+                    paystack_service = PaystackService()
                     
-                    order.stripe_payment_intent_id = payment_intent.id
-                    order.save()
+                    # Prepare order data for Paystack
+                    order_data = {
+                        'email': order.email,
+                        'total_amount': float(order.total_amount),
+                        'order_id': order.id,
+                        'first_name': order.first_name,
+                        'last_name': order.last_name,
+                        'phone': order.phone,
+                        'address': order.address,
+                        'items': [
+                            {
+                                'product_id': item.product.id,
+                                'product_name': item.product.name,
+                                'quantity': item.quantity,
+                                'price': float(item.product.price)
+                            }
+                            for item in order.items.all()
+                        ]
+                    }
                     
+                    # Initialize transaction
+                    result = paystack_service.initialize_transaction(order_data)
+                    
+                    if result['success']:
+                        # Store Paystack reference in order
+                        order.paystack_reference = result['reference']
+                        order.save()
+                        
+                        return Response({
+                            'order': OrderSerializer(order).data,
+                            'authorization_url': result['authorization_url'],
+                            'reference': result['reference'],
+                            'access_code': result['access_code'],
+                            'public_key': settings.PAYSTACK_PUBLIC_KEY
+                        }, status=status.HTTP_201_CREATED)
+                    else:
+                        order.delete()  # Delete order if transaction initialization fails
+                        return Response({
+                            'error': result['error']
+                        }, status=status.HTTP_400_BAD_REQUEST)
+                        
+                except Exception as e:
+                    order.delete()  # Delete order if any error occurs
                     return Response({
-                        'order': OrderSerializer(order).data,
-                        'client_secret': payment_intent.client_secret,
-                        'publishable_key': settings.STRIPE_PUBLISHABLE_KEY
-                    }, status=status.HTTP_201_CREATED)
-                    
-                except stripe.error.StripeError as e:
-                    order.delete()  # Delete order if payment intent creation fails
-                    return Response({
-                        'error': str(e)
+                        'error': f'Payment initialization failed: {str(e)}'
                     }, status=status.HTTP_400_BAD_REQUEST)
             else:
-                # Test mode - create order without Stripe
+                # Test mode - create order without Paystack
                 order.status = 'pending'
                 order.save()
                 
                 return Response({
                     'order': OrderSerializer(order).data,
-                    'client_secret': 'test_client_secret',
-                    'publishable_key': 'pk_test_placeholder',
+                    'authorization_url': f"{settings.SITE_URL}/test-payment/",
+                    'reference': f"TEST_REF_{order.id}",
+                    'access_code': f"TEST_ACCESS_{order.id}",
+                    'public_key': 'pk_test_placeholder',
                     'test_mode': True,
-                    'message': 'Order created in test mode. Stripe not configured.'
+                    'message': 'Order created in test mode. Paystack not configured.'
                 }, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -180,20 +206,25 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def confirm_payment(self, request, pk=None):
         order = self.get_object()
-        payment_intent_id = request.data.get('payment_intent_id')
+        reference = request.data.get('reference')
         
-        # Check if Stripe is properly configured
-        stripe_configured = (
-            settings.STRIPE_PUBLISHABLE_KEY != 'pk_test_your_stripe_publishable_key_here' and
-            settings.STRIPE_SECRET_KEY != 'sk_test_your_stripe_secret_key_here'
+        # Check if Paystack is properly configured
+        paystack_configured = (
+            settings.PAYSTACK_PUBLIC_KEY != 'pk_test_your_paystack_public_key_here' and
+            settings.PAYSTACK_SECRET_KEY != 'sk_test_your_paystack_secret_key_here'
         )
         
-        if stripe_configured:
-            if payment_intent_id and payment_intent_id == order.stripe_payment_intent_id:
+        if paystack_configured:
+            if reference:
                 try:
-                    payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
-                    if payment_intent.status == 'succeeded':
+                    paystack_service = PaystackService()
+                    result = paystack_service.verify_transaction(reference)
+                    
+                    if result['success'] and result['status'] == 'success':
                         order.status = 'confirmed'
+                        order.payment_reference = reference
+                        order.payment_amount = result['amount']
+                        order.payment_date = timezone.now()
                         order.save()
                         
                         # Send confirmation email
@@ -205,6 +236,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                                 
                                 Order #: {order.id}
                                 Total: ₦{order.total_amount}
+                                Payment Reference: {reference}
                                 
                                 We'll start preparing your order right away.
                                 You'll receive updates on your order status.
@@ -221,51 +253,36 @@ class OrderViewSet(viewsets.ModelViewSet):
                         
                         return Response({
                             'success': True,
-                            'message': 'Payment confirmed and order placed successfully!'
+                            'message': 'Payment confirmed and order placed successfully!',
+                            'reference': reference,
+                            'amount': result['amount']
                         })
                     else:
                         return Response({
-                            'error': 'Payment not completed'
+                            'error': result.get('error', 'Payment verification failed')
                         }, status=status.HTTP_400_BAD_REQUEST)
-                except stripe.error.StripeError as e:
+                        
+                except Exception as e:
                     return Response({
-                        'error': str(e)
+                        'error': f'Payment verification failed: {str(e)}'
                     }, status=status.HTTP_400_BAD_REQUEST)
-            
-            return Response({
-                'error': 'Invalid payment intent'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({
+                    'error': 'Payment reference is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
         else:
-            # Test mode - confirm order without Stripe
+            # Test mode - simulate payment confirmation
             order.status = 'confirmed'
+            order.payment_reference = f"TEST_REF_{order.id}"
+            order.payment_amount = order.total_amount
+            order.payment_date = timezone.now()
             order.save()
-            
-            # Send confirmation email
-            try:
-                send_mail(
-                    subject=f'Order Confirmed - {settings.SITE_NAME}',
-                    message=f'''
-                    Thank you for your order!
-                    
-                    Order #: {order.id}
-                    Total: ₦{order.total_amount}
-                    
-                    We'll start preparing your order right away.
-                    You'll receive updates on your order status.
-                    
-                    Best regards,
-                    {settings.SITE_NAME} Team
-                    ''',
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[order.email],
-                    fail_silently=True
-                )
-            except Exception as e:
-                print(f"Failed to send confirmation email: {e}")
             
             return Response({
                 'success': True,
-                'message': 'Order confirmed in test mode!',
+                'message': 'Payment confirmed in test mode!',
+                'reference': f"TEST_REF_{order.id}",
+                'amount': float(order.total_amount),
                 'test_mode': True
             })
 
@@ -680,55 +697,118 @@ def contact(request):
 
 @csrf_exempt
 @api_view(['POST'])
-def stripe_webhook(request):
-    payload = request.body
-    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-    
+def paystack_webhook(request):
+    """Handle Paystack webhook events"""
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError as e:
-        return HttpResponse(status=400)
-    except stripe.error.SignatureVerificationError as e:
-        return HttpResponse(status=400)
-    
-    if event['type'] == 'payment_intent.succeeded':
-        payment_intent = event['data']['object']
-        order_id = payment_intent['metadata']['order_id']
+        # Verify webhook signature
+        signature = request.headers.get('X-Paystack-Signature')
+        if not signature:
+            return Response({'error': 'No signature'}, status=400)
         
-        try:
-            order = Order.objects.get(id=order_id)
-            order.status = 'confirmed'
-            order.save()
-            
-            # Send confirmation email
-            try:
-                send_mail(
-                    subject=f'Order Confirmed - {settings.SITE_NAME}',
-                    message=f'''
-                    Thank you for your order!
-                    
-                    Order #: {order.id}
-                    Total: ₦{order.total_amount}
-                    
-                    We'll start preparing your order right away.
-                    You'll receive updates on your order status.
-                    
-                    Best regards,
-                    {settings.SITE_NAME} Team
-                    ''',
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[order.email],
-                    fail_silently=True
-                )
-            except Exception as e:
-                print(f"Failed to send confirmation email: {e}")
-                
-        except Order.DoesNotExist:
+        # Verify webhook secret
+        webhook_secret = settings.PAYSTACK_WEBHOOK_SECRET
+        if webhook_secret == 'whsec_your_paystack_webhook_secret_here':
+            # Test mode - accept all webhooks
             pass
-    
-    return HttpResponse(status=200)
+        else:
+            # In production, verify the signature
+            import hmac
+            import hashlib
+            
+            expected_signature = hmac.new(
+                webhook_secret.encode('utf-8'),
+                request.body,
+                hashlib.sha512
+            ).hexdigest()
+            
+            if not hmac.compare_digest(signature, expected_signature):
+                return Response({'error': 'Invalid signature'}, status=400)
+        
+        # Parse webhook data
+        webhook_data = json.loads(request.body)
+        event = webhook_data.get('event')
+        data = webhook_data.get('data', {})
+        
+        if event == 'charge.success':
+            # Payment successful
+            reference = data.get('reference')
+            amount = data.get('amount', 0) / 100  # Convert from kobo to naira
+            
+            try:
+                order = Order.objects.get(paystack_reference=reference)
+                order.status = 'confirmed'
+                order.payment_reference = reference
+                order.payment_amount = amount
+                order.payment_date = timezone.now()
+                order.save()
+                
+                # Send confirmation email
+                try:
+                    send_mail(
+                        subject=f'Payment Confirmed - {settings.SITE_NAME}',
+                        message=f'''
+                        Payment received for your order!
+                        
+                        Order #: {order.id}
+                        Amount: ₦{amount}
+                        Reference: {reference}
+                        
+                        Your order is being processed.
+                        
+                        Best regards,
+                        {settings.SITE_NAME} Team
+                        ''',
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[order.email],
+                        fail_silently=True
+                    )
+                except Exception as e:
+                    print(f"Failed to send webhook email: {e}")
+                
+                return Response({'status': 'success'})
+                
+            except Order.DoesNotExist:
+                return Response({'error': 'Order not found'}, status=404)
+        
+        elif event == 'charge.failed':
+            # Payment failed
+            reference = data.get('reference')
+            try:
+                order = Order.objects.get(paystack_reference=reference)
+                order.status = 'failed'
+                order.save()
+                
+                # Send failure notification
+                try:
+                    send_mail(
+                        subject=f'Payment Failed - {settings.SITE_NAME}',
+                        message=f'''
+                        Payment failed for your order.
+                        
+                        Order #: {order.id}
+                        Reference: {reference}
+                        
+                        Please try again or contact support.
+                        
+                        Best regards,
+                        {settings.SITE_NAME} Team
+                        ''',
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[order.email],
+                        fail_silently=True
+                    )
+                except Exception as e:
+                    print(f"Failed to send failure email: {e}")
+                
+                return Response({'status': 'success'})
+                
+            except Order.DoesNotExist:
+                return Response({'error': 'Order not found'}, status=404)
+        
+        return Response({'status': 'success'})
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
 
 
 

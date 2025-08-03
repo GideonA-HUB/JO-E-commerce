@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo    CHOPHOUSE Backend Startup
+echo    TASTY FINGERS Backend Startup
 echo ========================================
 echo.
 

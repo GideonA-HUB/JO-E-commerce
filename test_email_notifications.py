@@ -49,14 +49,14 @@ def test_email_sending():
     print("\n📧 Testing Email Sending...")
     
     try:
-        subject = f"Test Email from {getattr(settings, 'SITE_NAME', 'CHOPHOUSE')}"
+        subject = f"Test Email from {getattr(settings, 'SITE_NAME', 'TASTY FINGERS')}"
         message = """
 This is a test email to verify your email notifications are working.
 
 If you receive this email, your contact form notifications will work perfectly!
 
 ---
-Sent automatically from your CHOPHOUSE website.
+Sent automatically from your TASTY FINGERS website.
         """.strip()
         
         # Send test email

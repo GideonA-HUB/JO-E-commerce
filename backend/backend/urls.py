@@ -19,13 +19,14 @@ from django.urls import path, include
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
+from django.conf import settings
 from api.models import SiteSettings
 
 @csrf_exempt
 def api_root(request):
     """Welcome page for the API"""
     return JsonResponse({
-        'message': 'Welcome to CHOPHOUSE API',
+        'message': 'Welcome to TASTY FINGERS API',
         'endpoints': {
             'products': '/api/products/',
             'orders': '/api/orders/',
@@ -47,6 +48,9 @@ def main_site(request):
     except:
         # Fallback to default values if no settings exist
         context['site_settings'] = None
+    
+    # Add Paystack public key to context
+    context['paystack_public_key'] = settings.PAYSTACK_PUBLIC_KEY
     
     return render(request, 'main_site.html', context)
 

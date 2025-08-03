@@ -39,7 +39,7 @@ DEFAULT_FROM_EMAIL = 'your-actual-email@gmail.com'  # Your Gmail address
 
 # Email notification settings
 ADMIN_EMAIL = 'your-actual-email@gmail.com'  # Where you want notifications
-SITE_NAME = 'CHOPHOUSE'  # Your restaurant name
+SITE_NAME = 'TASTY FINGERS'  # Your restaurant name
 ```
 
 **Replace:**
@@ -100,7 +100,7 @@ Message:
 I need catering for 50 people for my wedding next month. Can you help?
 
 ---
-This message was sent automatically from your CHOPHOUSE website contact form.
+This message was sent automatically from your TASTY FINGERS website contact form.
 You can reply directly to john@example.com to respond to the customer.
 ```
 

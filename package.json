@@ -1,7 +1,7 @@
 {
-  "name": "chophouse-ecommerce",
+  "name": "tastyfingers-ecommerce",
   "version": "1.0.0",
-  "description": "Modern e-commerce website for CHOPHOUSE - Finger foods and catering business",
+  "description": "Modern e-commerce website for TASTY FINGERS - Finger foods and catering business",
   "main": "index.js",
   "scripts": {
     "dev": "npx tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
@@ -14,7 +14,7 @@
     "catering",
     "finger-foods"
   ],
-  "author": "CHOPHOUSE",
+  "author": "TASTY FINGERS",
   "license": "MIT",
   "devDependencies": {
     "autoprefixer": "^10.4.16",

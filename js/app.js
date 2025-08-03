@@ -21,10 +21,10 @@ document.addEventListener('alpine:init', () => {
         ],
         
         siteSettings: siteSettings || {
-            site_name: 'CHOPHOUSE',
+            site_name: 'TASTY FINGERS',
             tagline: 'Premium finger foods and catering services for all your special occasions.',
             phone: '+1 (555) 123-4567',
-            email: 'info@chophouse.com',
+            email: 'info@tastyfingers.com',
             address: '123 Food Street, Culinary District',
             hours: 'Mon-Sat: 9AM-9PM',
         },

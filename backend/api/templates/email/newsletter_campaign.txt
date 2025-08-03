@@ -5,7 +5,7 @@
 {{ campaign.content }}
 
 ---
-CHOPHOUSE Newsletter
+TASTY FINGERS Newsletter
 
 To unsubscribe from our newsletter, please visit:
 {{ unsubscribe_url }}

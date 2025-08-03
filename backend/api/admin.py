@@ -11,9 +11,9 @@ from .models import (
 )
 
 # Customize admin site
-admin.site.site_header = "CHOPHOUSE Admin"
-admin.site.site_title = "CHOPHOUSE Admin Portal"
-admin.site.index_title = "Welcome to CHOPHOUSE Administration"
+admin.site.site_header = "TASTY FINGERS Admin"
+admin.site.site_title = "TASTY FINGERS Admin Portal"
+admin.site.index_title = "Welcome to TASTY FINGERS Administration"
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):

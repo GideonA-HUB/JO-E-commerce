@@ -22,21 +22,16 @@ document.addEventListener('alpine:init', () => {
                 state: '',
                 zipCode: '',
                 instructions: ''
-            },
-            paymentInfo: {
-                cardNumber: '',
-                expiry: '',
-                cvv: ''
             }
         },
         cateringServices: [],
         serviceModalOpen: false,
         selectedService: null,
         siteSettings: {
-            site_name: 'CHOPHOUSE',
+            site_name: 'TASTY FINGERS',
             tagline: 'Premium finger foods and catering services for all your special occasions.',
             phone: '+1 (555) 123-4567',
-            email: 'info@chophouse.com',
+            email: 'info@tastyfingers.com',
             address: '123 Food Street, Culinary District',
             hours: 'Mon-Sat: 9AM-9PM',
         },
@@ -582,8 +577,7 @@ document.addEventListener('alpine:init', () => {
                         // Reset form
                         this.orderDetails = {
                             customerInfo: { firstName: '', lastName: '', email: '', phone: '' },
-                            deliveryInfo: { address: '', city: '', state: '', zipCode: '', instructions: '' },
-                            paymentInfo: { cardNumber: '', expiry: '', cvv: '' }
+                            deliveryInfo: { address: '', city: '', state: '', zipCode: '', instructions: '' }
                         };
                     } else {
                         throw new Error('Failed to confirm payment');

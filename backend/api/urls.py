@@ -18,5 +18,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('settings/', views.site_settings, name='site-settings'),
     path('contact/', views.contact, name='contact'),
-    path('stripe-webhook/', views.stripe_webhook, name='stripe-webhook'),
+    path('paystack-webhook/', views.paystack_webhook, name='paystack-webhook'),
 ] 

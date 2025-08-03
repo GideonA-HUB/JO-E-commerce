@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from api.models import Product
 
 class Command(BaseCommand):
-    help = 'Load sample products for CHOPHOUSE'
+    help = 'Load sample products for TASTY FINGERS'
 
     def handle(self, *args, **options):
         products = [
