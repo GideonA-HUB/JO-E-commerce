@@ -12,22 +12,23 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-here-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
-
+# Get allowed hosts from environment variable
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,0.0.0.0').split(',')
 
 # Application definition
 
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -76,17 +78,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Use DATABASE_URL for production (Railway), fallback to SQLite for development
+DATABASE_URL = config('DATABASE_URL', default=None)
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL)
     }
-}
-
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -106,28 +113,26 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR.parent / 'dist',  # Corrected path for output.css
     BASE_DIR / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise configuration for static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -144,13 +149,36 @@ REST_FRAMEWORK = {
 }
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # Only for development
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000,http://127.0.0.1:8000').split(',')
 CORS_ALLOW_CREDENTIALS = True
+
+# Security settings for production
+if not DEBUG:
+    # Security middleware settings
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_REDIRECT_EXEMPT = []
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # Additional security headers
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+    
+    # Disable CORS for all origins in production
+    CORS_ALLOW_ALL_ORIGINS = False
+else:
+    # Development settings
+    CORS_ALLOW_ALL_ORIGINS = True
 
 # Session settings for separate admin and customer sessions
 SESSION_COOKIE_NAME = 'sessionid'
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_SECURE = not DEBUG  # Set to True in production with HTTPS
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 SESSION_COOKIE_DOMAIN = None
@@ -159,36 +187,63 @@ SESSION_COOKIE_DOMAIN = None
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # Paystack settings (RECOMMENDED for Nigerian businesses)
-# Replace these placeholder keys with your real Paystack API keys
-# Get your keys from: https://dashboard.paystack.com/#/settings/developers
-PAYSTACK_PUBLIC_KEY = 'pk_test_your_paystack_public_key_here'  # Replace with your real public key
-PAYSTACK_SECRET_KEY = 'sk_test_your_paystack_secret_key_here'  # Replace with your real secret key
-PAYSTACK_WEBHOOK_SECRET = 'whsec_your_paystack_webhook_secret_here'  # Replace with your webhook secret
+PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY', default='pk_test_your_paystack_public_key_here')
+PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY', default='sk_test_your_paystack_secret_key_here')
+PAYSTACK_WEBHOOK_SECRET = config('PAYSTACK_WEBHOOK_SECRET', default='whsec_your_paystack_webhook_secret_here')
 
 # Payment Gateway Selection
-# Set to 'paystack' for Nigerian business, 'stripe' for international
-PAYMENT_GATEWAY = 'paystack'  # Options: 'paystack', 'stripe', 'flutterwave'
-
-# Development server settings
-if DEBUG:
-    # Ignore patterns for development server to prevent constant reloading
-    import os
-    os.environ.setdefault('DJANGO_IGNORE_PATTERNS', 'venv/*,node_modules/*,.git/*,__pycache__/*')
-
-# Telegram Bot settings - REMOVED
-# TELEGRAM_BOT_TOKEN = 'your_bot_token_here'
-# TELEGRAM_CHAT_ID = your_chat_id_here
+PAYMENT_GATEWAY = config('PAYMENT_GATEWAY', default='paystack')
 
 # Email settings for customer responses
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # Change to your email provider
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'gideonamienz24@gmail.com'  # Your Gmail address
-EMAIL_HOST_PASSWORD = 'yjoc wzra wxjm zeck'  # Your app password
-DEFAULT_FROM_EMAIL = 'gideonamienz24@gmail.com'  # Your Gmail address
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='your-email@gmail.com')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='your-app-password')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='your-email@gmail.com')
 
 # Email notification settings
-ADMIN_EMAIL = 'gideonamienz24@gmail.com'  # Email where you want to receive notifications
-SITE_NAME = 'TASTY FINGERS'  # Your restaurant name for email subjects
-SITE_URL = 'http://127.0.0.1:8000'  # Your site URL for unsubscribe links
+ADMIN_EMAIL = config('ADMIN_EMAIL', default='your-email@gmail.com')
+SITE_NAME = config('SITE_NAME', default='TASTY FINGERS')
+SITE_URL = config('SITE_URL', default='http://127.0.0.1:8000')
+
+# Cloudinary settings
+CLOUDINARY = {
+    'cloud_name': config('CLOUDINARY_CLOUD_NAME', default='your-cloud-name'),
+    'api_key': config('CLOUDINARY_API_KEY', default='your-api-key'),
+    'api_secret': config('CLOUDINARY_API_SECRET', default='your-api-secret'),
+}
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
