@@ -30,9 +30,191 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
+
+        /* Dark Theme Styles */
+        .dark {
+            color-scheme: dark;
+        }
+
+        .dark body {
+            background-color: #111827;
+            color: #f9fafb;
+        }
+
+        .dark nav {
+            background-color: #1f2937;
+            border-bottom: 1px solid #374151;
+        }
+
+        .dark .bg-white {
+            background-color: #1f2937;
+        }
+
+        .dark .text-gray-900 {
+            color: #f9fafb;
+        }
+
+        .dark .text-gray-700 {
+            color: #d1d5db;
+        }
+
+        .dark .text-gray-600 {
+            color: #9ca3af;
+        }
+
+        .dark .text-gray-500 {
+            color: #6b7280;
+        }
+
+        .dark .text-gray-400 {
+            color: #9ca3af;
+        }
+
+        .dark .text-gray-300 {
+            color: #d1d5db;
+        }
+
+        .dark .bg-gray-50 {
+            background-color: #111827;
+        }
+
+        .dark .bg-gray-100 {
+            background-color: #374151;
+        }
+
+        .dark .bg-gray-200 {
+            background-color: #4b5563;
+        }
+
+        .dark .bg-gray-300 {
+            background-color: #6b7280;
+        }
+
+        .dark .border-gray-200 {
+            border-color: #374151;
+        }
+
+        .dark .border-gray-300 {
+            border-color: #4b5563;
+        }
+
+        .dark .border-gray-400 {
+            border-color: #6b7280;
+        }
+
+        .dark .border-gray-600 {
+            border-color: #9ca3af;
+        }
+
+        .dark .border-gray-800 {
+            border-color: #374151;
+        }
+
+        .dark .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark .shadow-xl {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark .shadow-2xl {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+
+        .dark .card {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+        }
+
+        .dark .btn-outline {
+            border-color: #4b5563;
+            color: #d1d5db;
+        }
+
+        .dark .btn-outline:hover {
+            background-color: #374151;
+            border-color: #6b7280;
+        }
+
+        .dark input, .dark textarea, .dark select {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+
+        .dark input:focus, .dark textarea:focus, .dark select:focus {
+            border-color: #ea580c;
+            ring-color: #ea580c;
+        }
+
+        .dark .bg-gray-900 {
+            background-color: #111827;
+        }
+
+        .dark .bg-gray-800 {
+            background-color: #1f2937;
+        }
+
+        .dark .bg-blue-50 {
+            background-color: #1e3a8a;
+        }
+
+        .dark .bg-blue-100 {
+            background-color: #1e40af;
+        }
+
+        .dark .bg-green-100 {
+            background-color: #065f46;
+        }
+
+        .dark .bg-red-100 {
+            background-color: #991b1b;
+        }
+
+        .dark .bg-yellow-100 {
+            background-color: #92400e;
+        }
+
+        .dark .bg-orange-100 {
+            background-color: #9a3412;
+        }
+
+        .dark .text-blue-900 {
+            color: #dbeafe;
+        }
+
+        .dark .text-blue-700 {
+            color: #bfdbfe;
+        }
+
+        .dark .text-blue-600 {
+            color: #93c5fd;
+        }
+
+        .dark .text-green-700 {
+            color: #bbf7d0;
+        }
+
+        .dark .text-red-700 {
+            color: #fecaca;
+        }
+
+        .dark .text-yellow-800 {
+            color: #fef3c7;
+        }
+
+        .dark .text-orange-500 {
+            color: #fdba74;
+        }
+
+        /* Dark theme transition */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
     </style>
 </head>
-<body class="bg-gray-50" x-data="app({{ user.is_authenticated|yesno:'true,false' }}, '{{ user.email|escapejs }}', null)" x-init="init()">
+<body class="bg-gray-50" x-data="app({{ user.is_authenticated|yesno:'true,false' }}, '{{ user.email|escapejs }}', null)" x-init="init()" :class="{ 'dark': isDarkMode }">
     <!-- Navigation -->
     <nav class="bg-white shadow-lg sticky top-0 z-50 backdrop-blur">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,6 +240,11 @@
 
                 <!-- Cart & Auth Buttons -->
                 <div class="flex items-center space-x-4">
+                    <!-- Dark Theme Toggle -->
+                    <button @click="toggleDarkMode()" class="relative p-2 text-gray-700 hover:text-primary-600 transition-colors" title="Toggle Dark Mode">
+                        <i x-show="!isDarkMode" class="fas fa-moon text-xl"></i>
+                        <i x-show="isDarkMode" class="fas fa-sun text-xl"></i>
+                    </button>
                     <!-- Wishlist Icon -->
                     <span class="relative p-2 text-gray-700 hover:text-primary-600 transition-colors cursor-pointer" title="Wishlist" @click="wishlistModalOpen = true">
                         <i :class="[wishlistItems.length > 0 ? 'fas fa-heart text-orange-500' : 'far fa-heart'] + ' text-xl'"></i>
@@ -91,6 +278,13 @@
                 <a href="#catering" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">Catering</a>
                 <a href="#about" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">About</a>
                 <a href="#contact" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">Contact</a>
+                <a href="#blog" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">Blog</a>
+                <!-- Dark Mode Toggle (Mobile) -->
+                <button @click="toggleDarkMode()" class="text-gray-700 hover:text-primary-600 block w-full text-left px-3 py-2 rounded-md text-base font-medium">
+                    <i x-show="!isDarkMode" class="fas fa-moon mr-2"></i>
+                    <i x-show="isDarkMode" class="fas fa-sun mr-2"></i>
+                    <span x-text="isDarkMode ? 'Light Mode' : 'Dark Mode'"></span>
+                </button>
                 <!-- Login/Signup Buttons (Mobile) -->
                 {% if user.is_authenticated and user.profile.role == 'user' %}
                     <span class="block w-full mt-2 font-semibold text-primary-600">Welcome, {{ user.profile.full_name|default:user.email|title }}</span>
@@ -104,8 +298,8 @@
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="hero-gradient min-h-screen flex items-center justify-center relative overflow-hidden">
-        <div class="absolute inset-0 bg-black opacity-20"></div>
+    <section id="home" class="min-h-screen flex items-center justify-center relative overflow-hidden" style="background-image: url('https://static.vecteezy.com/system/resources/thumbnails/033/771/538/small_2x/various-types-of-vegetables-and-spices-arranged-in-a-circle-ai-generated-photo.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+        <div class="absolute inset-0 bg-black opacity-50"></div>
         <div class="relative z-10 text-center px-4 sm:px-6 lg:px-8">
             <h1 class="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white text-shadow mb-6">
                 Welcome to <span class="text-primary-400">TASTY FINGERS</span>
@@ -210,25 +404,32 @@
                             <div class="product-card">
                                 <img :src="product.image || 'https://picsum.photos/400/300?random=1'" :alt="product.name" class="w-full h-48 object-cover transition-transform duration-300 hover:scale-110 rounded-lg" @error="event.target.src='https://picsum.photos/400/300?random=1'" />
                                 <div class="p-6">
-                                    <h3 class="text-xl font-semibold text-gray-900 mb-2" x-text="product.name"></h3>
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <template x-for="star in 5">
-                                            <i class="fas fa-star text-xs" :class="product.average_rating >= star ? 'text-yellow-400' : 'text-gray-300'"></i>
-                                        </template>
-                                        <span class="text-sm text-gray-600 ml-1" x-text="product.average_rating ? product.average_rating.toFixed(1) : '0.0'"></span>
-                                        <span class="text-xs text-gray-500 ml-1" x-text="'(' + (product.review_count || 0) + ' reviews)'"></span>
+                                    <h3 class="font-semibold mb-2" style="color: #000000 !important; font-size: 14px; line-height: 1.3;" x-text="product.name"></h3>
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="flex items-center gap-1">
+                                            <template x-for="star in 5">
+                                                <i class="fas fa-star" style="font-size: 16px; color: #FFD700;" :class="product.average_rating >= star ? 'text-yellow-500' : 'text-gray-300'" :style="product.average_rating >= star ? 'color: #FFD700 !important;' : 'color: #CCC !important;'"></i>
+                                            </template>
+                                        </div>
+                                        <span class="font-normal ml-3" style="color: #222222 !important; font-size: 11px; line-height: 1.3;" x-text="product.average_rating ? product.average_rating.toFixed(1) : '0.0'"></span>
+                                        <span class="font-normal ml-1" style="color: #222222 !important; font-size: 11px; line-height: 1.3;" x-text="'(' + (product.review_count || 0) + ' reviews)'"></span>
                                     </div>
-                                    <p class="text-gray-600 mb-4" x-text="product.description"></p>
-                                    <div class="text-2xl font-bold text-primary-600 text-center mb-2" x-text="'₦' + product.price"></div>
+                                    <p class="font-normal mb-3" style="color: #444444 !important; font-size: 12px; line-height: 1.4;" x-text="product.description"></p>
+                                    <div class="font-bold text-center mb-3" style="color: #f97316 !important; font-size: 14px; line-height: 1.3;" x-text="'₦' + product.price"></div>
                                     <div class="flex items-center justify-between gap-3 mt-2">
                                         <button @click="addToCart(product)" class="btn-primary text-xs px-2 py-1">
                                             <i class="fas fa-plus mr-1"></i>
                                             Add to Cart
                                         </button>
-                                        <button @click="openProductModal(product)" class="btn-outline text-xs px-2 py-1">
-                                            <i class="fas fa-eye mr-1"></i>
-                                            View Details
-                                        </button>
+                                        <div class="flex items-center gap-2">
+                                            <button @click="isInWishlist(product.id) ? removeFromWishlist(product.id) : addToWishlist(product)" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                                                <i :class="isInWishlist(product.id) ? 'fas fa-heart text-red-500' : 'far fa-heart text-gray-400'" class="text-lg" :style="isInWishlist(product.id) ? 'color: #ef4444 !important;' : 'color: #9ca3af !important;'"></i>
+                                            </button>
+                                            <button @click="openProductModal(product)" class="btn-outline text-xs px-2 py-1">
+                                                <i class="fas fa-eye mr-1"></i>
+                                                View Details
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -240,18 +441,19 @@
     </section>
 
     <!-- Catering Section -->
-    <section id="catering" class="py-20 gradient-bg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="catering" class="py-20 relative" style="background-image: url('https://cafemom.com/wp-content/uploads/2025/02/catered-buffet-1024x576.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+        <div class="absolute inset-0 bg-black opacity-60"></div>
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4">Catering Services</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-display font-bold text-white mb-4">Catering Services</h2>
+                <p class="text-xl text-white max-w-3xl mx-auto">
                     Let us make your event unforgettable with our premium catering and event setup services
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <template x-for="service in cateringServices" :key="service.id">
-                    <div class="card p-8 text-center">
+                    <div class="card p-8 text-center bg-white bg-opacity-95 backdrop-blur-sm">
                         <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
                             <i :class="service.icon + ' text-2xl text-primary-600'"></i>
                         </div>
@@ -295,11 +497,12 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="py-20 gradient-bg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="contact" class="py-20 relative" style="background-image: url('https://media.istockphoto.com/id/1159648155/vector/contact-us-black-background.jpg?s=170667a&w=0&k=20&c=soTUnV0viAbdcv6NSOYFSgfT-MV6pcOSOQ4yZ16PyJ0='); background-size: cover; background-position: center; background-repeat: no-repeat;">
+        <div class="absolute inset-0 bg-black opacity-60"></div>
+                <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4">Get In Touch</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-display font-bold text-white mb-4">Get In Touch</h2>
+                <p class="text-xl text-white max-w-3xl mx-auto">
                     Ready to plan your next event? Contact us for a consultation and quote.
                 </p>
             </div>
@@ -577,9 +780,49 @@
                         
                         <!-- Success Message -->
                         <div x-show="orderSuccess" x-transition class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                            <div class="flex items-center">
-                                <i class="fas fa-check-circle mr-2"></i>
-                                <span x-text="orderSuccessMessage"></span>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    <span x-text="orderSuccessMessage"></span>
+                                </div>
+                                <button @click="checkoutOpen = false" class="text-green-600 hover:text-green-800">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Order Details -->
+                        <div x-show="orderSuccess && createdOrder" x-transition class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h5 class="font-semibold text-blue-900 mb-3">Order Details</h5>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Order ID:</span>
+                                    <span x-text="'#' + createdOrder.id"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Status:</span>
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs" x-text="createdOrder.status"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Total Amount:</span>
+                                    <span x-text="'₦' + createdOrder.total_amount"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Customer:</span>
+                                    <span x-text="createdOrder.first_name + ' ' + createdOrder.last_name"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Email:</span>
+                                    <span x-text="createdOrder.email"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Phone:</span>
+                                    <span x-text="createdOrder.phone"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Delivery Address:</span>
+                                    <span x-text="createdOrder.address + ', ' + createdOrder.city + ', ' + createdOrder.state"></span>
+                                </div>
                             </div>
                         </div>
                         
@@ -643,17 +886,21 @@
                 
                 <!-- Footer -->
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button x-show="checkoutStep === 3" @click="placeOrder()" :disabled="paymentProcessing" class="btn-primary w-full sm:w-auto sm:ml-3" :class="{ 'opacity-50 cursor-not-allowed': paymentProcessing }">
+                    <button x-show="checkoutStep === 3 && !orderSuccess" @click="placeOrder()" :disabled="paymentProcessing" class="btn-primary w-full sm:w-auto sm:ml-3" :class="{ 'opacity-50 cursor-not-allowed': paymentProcessing }">
                         <i class="fas fa-check mr-2" :class="{ 'fa-spin': paymentProcessing }"></i>
                         <span x-text="paymentProcessing ? 'Processing...' : 'Place Order'"></span>
+                    </button>
+                    <button x-show="checkoutStep === 3 && orderSuccess" @click="checkoutOpen = false" class="btn-primary w-full sm:w-auto sm:ml-3">
+                        <i class="fas fa-check mr-2"></i>
+                        Close
                     </button>
                     <button x-show="checkoutStep < 3" @click="nextCheckoutStep()" class="btn-primary w-full sm:w-auto sm:ml-3">
                         Continue
                     </button>
-                    <button x-show="checkoutStep > 1" @click="prevCheckoutStep()" class="btn-outline w-full sm:w-auto mt-3 sm:mt-0">
+                    <button x-show="checkoutStep > 1 && !orderSuccess" @click="prevCheckoutStep()" class="btn-outline w-full sm:w-auto mt-3 sm:mt-0">
                         Back
                     </button>
-                    <button @click="checkoutOpen = false" class="btn-outline w-full sm:w-auto mt-3 sm:mt-0">
+                    <button x-show="!orderSuccess" @click="checkoutOpen = false" class="btn-outline w-full sm:w-auto mt-3 sm:mt-0">
                         Cancel
                     </button>
                 </div>
@@ -733,112 +980,108 @@
         </div>
     </div>
 
-    <!-- Product Details Modal (absolutely forced rectangle, centered, strong fade-in, dim/blur background, small image, all text visible, inline styles) -->
-    <div x-show="productModalOpen" x-transition class="fixed inset-0 z-50 flex items-center justify-center" style="display:none;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);animation:modal-fade-in 0.4s cubic-bezier(0.4,0,0.2,1);" @click.self="closeProductModal()">
-        <div style="width:700px;min-height:460px;max-width:98vw;max-height:90vh;display:flex;flex-direction:column;overflow-y:auto;border-radius:1.25rem;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);border:2px solid #e5e7eb;background:#fff;position:relative;margin:auto;" class="animate-fade-in">
-            <button @click="closeProductModal()" style="position:absolute;top:20px;right:20px;z-index:100;background:#fff;border:1px solid #d1d5db;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1);padding:0.5rem;border-radius:9999px;font-size:1.5rem;color:#374151;cursor:pointer;transition:background 0.2s,color 0.2s;" onmouseover="this.style.background='#f3f4f6';this.style.color='#ea580c'" onmouseout="this.style.background='#fff';this.style.color='#374151'">
+    <!-- Product Details Modal -->
+    <div x-show="productModalOpen" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-2xl" @click.self="closeProductModal()" style="background-color: rgba(0, 0, 0, 0.5) !important; backdrop-filter: blur(20px) !important;">
+        <div class="w-[550px] h-[550px] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl relative animate-fade-in overflow-y-auto" style="width: 550px !important; height: 550px !important; max-width: 550px !important; max-height: 550px !important; border-radius: 24px !important;">
+            <button @click="closeProductModal()" class="absolute top-5 right-5 z-50 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 shadow-lg p-2 rounded-full text-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-primary-600 transition-all duration-200">
                 <i class="fas fa-times"></i>
             </button>
-            <span
-                x-show="isAuthenticated"
-                :title="isInWishlist(selectedProduct.id) ? 'In Wishlist' : 'Add to Wishlist'"
-                style="position:absolute;top:20px;right:70px;z-index:100;font-size:1.7rem;cursor:pointer;color:#ea580c;"
-                @click.prevent="isInWishlist(selectedProduct.id) ? removeFromWishlist(selectedProduct.id) : addToWishlist(selectedProduct)"
-            >
-                <i :class="isInWishlist(selectedProduct.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
-            </span>
-            <div style="display:flex;flex-direction:column;gap:1rem;padding:2rem;padding-top:110px;">
-                <div style="display:flex;flex-direction:row;gap:2rem;align-items:flex-start;">
-                    <!-- Small image -->
-                    <div style="flex-shrink:0;width:208px;height:208px;background:#f3f4f6;border-radius:0.75rem;display:flex;align-items:center;justify-content:center;">
-                        <img :src="selectedProduct.image || 'https://picsum.photos/400/300?random=1'" :alt="selectedProduct.name" style="object-fit:cover;border-radius:0.75rem;width:208px;height:208px;max-width:none;">
+            <div class="flex flex-col gap-5 p-6 pt-16">
+                <div class="flex flex-row gap-6 items-start">
+                    <!-- Product image -->
+                    <div class="flex-shrink-0 w-52 h-52 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center overflow-hidden" style="width: 208px !important; height: 208px !important;">
+                        <img :src="selectedProduct.image || 'https://picsum.photos/400/300?random=1'" :alt="selectedProduct.name" class="object-cover w-full h-full rounded-xl" style="width: 208px !important; height: 208px !important;">
                     </div>
-                    <!-- Details -->
-                    <div style="width:320px;display:flex;flex-direction:column;gap:0.5rem;">
-                        <h2 style="font-size:1.25rem;font-weight:bold;word-break:break-word;white-space:normal;margin-bottom:0.25rem;" x-text="selectedProduct.name"></h2>
-                        <div style="font-weight:600;font-size:1rem;margin-bottom:0.25rem;">Description</div>
-                        <p style="color:#374151;margin-bottom:0.5rem;font-size:1rem;" x-text="selectedProduct.description"></p>
-                        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+                    <!-- Product details -->
+                    <div class="flex-1 flex flex-col gap-4 min-w-0">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white break-words mb-3" x-text="selectedProduct.name"></h2>
+                        <div class="font-bold text-lg text-gray-900 dark:text-white mb-3">Description</div>
+                        <p class="text-gray-900 dark:text-white font-medium mb-4 text-lg" x-text="selectedProduct.description"></p>
+                        <div class="flex items-center gap-3 mb-4">
                             <template x-for="star in 5">
-                                <i class="fas fa-star" style="color:#fbbf24;font-size:1rem;"></i>
+                                <i class="fas fa-star text-yellow-400 text-xl"></i>
                             </template>
-                            <span style="color:#374151;font-weight:600;font-size:0.875rem;">0 (0 reviews)</span>
+                            <span class="text-gray-900 dark:text-white font-bold text-base">0 (0 reviews)</span>
                         </div>
-                        <div style="color:#ea580c;font-weight:bold;font-size:1.25rem;margin-bottom:0.5rem;" x-text="'₦' + selectedProduct.price"></div>
-                        <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.5rem;">
+                        <div class="text-primary-600 dark:text-orange-400 font-bold text-2xl mb-4" x-text="'₦' + selectedProduct.price"></div>
+                        <div class="flex flex-wrap gap-4 mb-4">
                             <button
                                 :disabled="!isAuthenticated"
-                                :class="[isInWishlist(selectedProduct.id) ? 'bg-orange-100 border-orange-500 text-orange-500' : 'btn-outline', 'text-base px-4 py-2 flex items-center gap-2']"
+                                :class="[isInWishlist(selectedProduct.id) ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30' : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600', 'text-lg px-5 py-3 flex items-center gap-2 border-2 rounded-lg font-medium transition-all duration-200']"
                                 @click.prevent="isInWishlist(selectedProduct.id) ? removeFromWishlist(selectedProduct.id) : addToWishlist(selectedProduct)"
                                 :title="!isAuthenticated ? 'Login to use wishlist' : (isInWishlist(selectedProduct.id) ? 'Remove from Wishlist' : 'Add to Wishlist')"
                             >
-                                <i :class="isInWishlist(selectedProduct.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
+                                <i :class="isInWishlist(selectedProduct.id) ? 'fas fa-heart text-red-500' : 'far fa-heart'"></i>
                                 <span x-text="isInWishlist(selectedProduct.id) ? 'In Wishlist' : 'Add to Wishlist'"></span>
                             </button>
-                            <button @click="addToCart(selectedProduct)" class="btn-primary text-base px-4 py-2 flex items-center gap-2">
+                            <button @click="addToCart(selectedProduct)" class="btn-primary text-lg px-5 py-3 flex items-center gap-2">
                                 <i class="fas fa-plus"></i> Add to Cart
                             </button>
                         </div>
                     </div>
                 </div>
                 <!-- Customer Reviews Section -->
-                <div style="border-top:1px solid #e5e7eb;padding-top:1.5rem;">
-                    <h3 style="font-size:1.25rem;font-weight:bold;margin-bottom:1rem;">Customer Reviews</h3>
+                <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Customer Reviews</h3>
                     
                     <!-- Existing Reviews -->
-                    <div style="margin-bottom:1.5rem;">
-                        <div x-show="comments.length === 0" style="text-align:center;color:#6b7280;padding:1rem;">
+                    <div class="mb-4">
+                        <div x-show="comments.length === 0" class="text-center text-gray-900 dark:text-white font-bold p-4 text-base">
                             No reviews yet. Be the first to review this product!
                         </div>
-                        <div x-show="comments.length > 0" style="max-height:200px;overflow-y:auto;">
+                        <div x-show="comments.length > 0" class="max-h-32 overflow-y-auto">
                             <template x-for="comment in comments" :key="comment.id">
-                                <div style="border-bottom:1px solid #e5e7eb;padding:0.75rem 0;">
-                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
-                                        <span style="font-weight:600;color:#374151;" x-text="comment.user_email || 'Anonymous'"></span>
-                                        <span style="font-size:0.75rem;color:#6b7280;" x-text="new Date(comment.created_at).toLocaleDateString()"></span>
+                                <div class="border-b border-gray-200 dark:border-gray-600 py-3">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-bold text-gray-900 dark:text-white text-base" x-text="comment.user_email || 'Anonymous'"></span>
+                                        <span class="text-base text-gray-900 dark:text-white font-semibold" x-text="new Date(comment.created_at).toLocaleDateString()"></span>
                                     </div>
-                                    <p style="color:#4b5563;font-size:0.875rem;" x-text="comment.comment"></p>
+                                    <p class="text-gray-900 dark:text-white font-medium text-base" x-text="comment.comment"></p>
                                 </div>
                             </template>
                         </div>
                     </div>
                     
-                    <div style="background:#f9fafb;border-radius:0.75rem;padding:1.5rem;width:100%;max-width:32rem;margin:auto;">
-                        <div x-show="reviewSuccess" style="background:#d1fae5;color:#065f46;padding:0.75rem 1rem;border-radius:0.5rem;margin-bottom:0.75rem;font-weight:600;" x-text="reviewSuccess"></div>
-                        <div x-show="reviewError" style="background:#fee2e2;color:#991b1b;padding:0.75rem 1rem;border-radius:0.5rem;margin-bottom:0.75rem;font-weight:600;" x-text="reviewError"></div>
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 w-full max-w-lg mx-auto">
+                        <div x-show="reviewSuccess" class="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 p-3 rounded mb-3 font-semibold text-base" x-text="reviewSuccess"></div>
+                        <div x-show="reviewError" class="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 p-3 rounded mb-3 font-semibold text-base" x-text="reviewError"></div>
                         
                         <!-- Review Form -->
                         <div x-show="isAuthenticated">
-                            <div style="font-weight:600;margin-bottom:0.5rem;">Write a Review</div>
-                            <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
-                                <input type="text" placeholder="Your Name" x-model="commentName" style="border-radius:0.5rem;border:1px solid #d1d5db;padding:0.5rem 0.75rem;font-size:0.875rem;width:50%;">
-                                <input type="email" placeholder="Your Email" x-model="userEmail" style="border-radius:0.5rem;border:1px solid #d1d5db;padding:0.5rem 0.75rem;font-size:0.875rem;width:50%;" readonly>
+                            <div class="font-bold text-gray-900 dark:text-white mb-3 text-base">Write a Review</div>
+                            <div x-show="hasUserReviewed" class="mb-4 p-3 bg-blue-100 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 rounded-lg text-sm">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                You have already submitted a review for this product. You can only submit one review per product.
                             </div>
-                            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
-                                <span style="font-size:0.875rem;">Rating</span>
-                                <div style="display:flex;gap:0.25rem;">
+                            <div class="flex gap-3 mb-3">
+                                <input type="text" placeholder="Your Name" x-model="commentName" class="flex-1 rounded border border-gray-300 dark:border-gray-500 p-3 text-base bg-white dark:bg-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300 font-medium">
+                                <input type="email" placeholder="Your Email" x-model="userEmail" class="flex-1 rounded border border-gray-300 dark:border-gray-500 p-3 text-base bg-white dark:bg-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300 font-medium" readonly>
+                            </div>
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="text-base text-gray-900 dark:text-white font-bold">Rating</span>
+                                <div class="flex gap-1">
                                     <template x-for="i in 5">
-                                        <i @mouseenter="hoverRating = i" @mouseleave="hoverRating = 0" @click="ratingValue = i" :class="[i <= (hoverRating || ratingValue) ? 'fas fa-star' : 'far fa-star']" style="font-size:1.25rem;cursor:pointer;transition:all 0.2s ease;" :style="i <= (hoverRating || ratingValue) ? 'color: #f59e0b; transform: scale(1.1);' : 'color: #d1d5db;'"></i>
+                                        <i @mouseenter="hoverRating = i" @mouseleave="hoverRating = 0" @click="ratingValue = i" :class="[i <= (hoverRating || ratingValue) ? 'fas fa-star' : 'far fa-star']" class="text-lg cursor-pointer transition-all duration-200" :class="i <= (hoverRating || ratingValue) ? 'text-yellow-500 scale-110' : 'text-gray-300 dark:text-gray-400'"></i>
                                     </template>
                                 </div>
-                                <span style="font-size:0.75rem;color:#6b7280;" x-text="ratingValue + ' stars'"></span>
+                                <span class="text-base text-gray-900 dark:text-white font-bold" x-text="ratingValue + ' stars'"></span>
                             </div>
-                            <textarea placeholder="Share your experience..." x-model="commentText" style="width:100%;border-radius:0.5rem;border:1px solid #d1d5db;padding:0.5rem;margin-bottom:0.5rem;font-size:0.875rem;"></textarea>
-                            <div style="display:flex;gap:1rem;margin-top:0.5rem;">
-                                <button type="button" @click="submitReview()" class="btn-primary flex-1 py-2 flex items-center justify-center gap-2" :disabled="commentSubmitting">
-                                    <i class="fas fa-paper-plane"></i> 
+                            <textarea placeholder="Share your experience..." x-model="commentText" rows="2" class="w-full rounded border border-gray-300 dark:border-gray-500 p-3 mb-3 text-base bg-white dark:bg-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300 font-medium"></textarea>
+                            <div class="flex gap-3 mt-3">
+                                <button type="button" @click="submitReview()" class="btn-primary flex-1 py-2 flex items-center justify-center gap-1 text-base" :disabled="commentSubmitting || hasUserReviewed">
+                                    <i class="fas fa-paper-plane text-base"></i> 
                                     <span x-show="!commentSubmitting">Submit Review</span>
                                     <span x-show="commentSubmitting">Submitting...</span>
                                 </button>
-                                <button type="button" class="btn-outline flex-1 py-2" @click="closeProductModal()">Cancel</button>
+                                <button type="button" class="btn-outline flex-1 py-2 text-base" @click="closeProductModal()">Cancel</button>
                             </div>
-                            <div x-show="commentError" class="text-xs text-red-600 mt-1" x-text="commentError"></div>
+                            <div x-show="commentError" class="text-base text-red-600 dark:text-red-400 mt-1" x-text="commentError"></div>
                         </div>
                         
                         <!-- Login Prompt -->
-                        <div x-show="!isAuthenticated" style="text-align:center;padding:1rem;">
-                            <p style="color:#6b7280;margin-bottom:1rem;">Please log in to leave a review</p>
-                            <a href="/login/" class="btn-primary">Login to Review</a>
+                        <div x-show="!isAuthenticated" class="text-center p-4">
+                            <p class="text-gray-900 dark:text-white font-bold mb-4 text-base">Please log in to leave a review</p>
+                            <a href="/login/" class="btn-primary text-base py-2 px-4">Login to Review</a>
                         </div>
                     </div>
                 </div>
@@ -878,28 +1121,30 @@
         </div>
     </div>
 
-    <!-- Wishlist Modal (centered, fade-in, dim/blur background, forced rectangle, forced image size) -->
-    <div x-show="wishlistModalOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);" @click.self="wishlistModalOpen = false">
-        <div style="width:500px;max-width:95vw;min-height:350px;max-height:90vh;display:flex;flex-direction:column;overflow-y:auto;border-radius:1.25rem;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);border:2px solid #e5e7eb;background:#fff;position:relative;margin:auto;animation: fadeIn 0.3s ease-out;" class="animate-fade-in">
-            <button @click="wishlistModalOpen = false" class="absolute top-2 right-2 z-50 bg-white border border-gray-300 shadow-lg p-2 rounded-full hover:bg-gray-100 hover:text-primary-600 transition-colors">
-                <i class="fas fa-times text-xl"></i>
+    <!-- Wishlist Modal - True Square with Solid Backgrounds -->
+    <div x-show="wishlistModalOpen" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-2xl" @click.self="wishlistModalOpen = false" style="background-color: rgba(0, 0, 0, 0.5) !important; backdrop-filter: blur(20px) !important;">
+        <div class="w-[500px] h-[500px] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl relative animate-fade-in overflow-y-auto" style="width: 500px !important; height: 500px !important; max-width: 90% !important; max-height: 90% !important; border-radius: 24px !important;">
+            <button @click="wishlistModalOpen = false" class="absolute top-5 right-5 z-50 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 shadow-lg p-2 rounded-full text-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-primary-600 transition-all duration-200">
+                <i class="fas fa-times"></i>
             </button>
-            <div class="flex flex-col gap-4 p-8 pt-12">
-                <h2 class="text-2xl font-bold mb-6 text-center">My Wishlist</h2>
+            <div class="flex flex-col gap-4 p-6 pt-16">
+                <h2 class="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white">My Wishlist</h2>
+                
                 <template x-if="wishlistItems.length === 0">
-                    <div class="text-center text-gray-500">Your wishlist is empty.</div>
+                    <div class="text-center text-gray-500 dark:text-gray-400">Your wishlist is empty.</div>
                 </template>
-                <div class="space-y-4 max-h-96 overflow-y-auto" x-show="wishlistItems.length > 0">
+                
+                <div class="space-y-4 max-h-80 overflow-y-auto" x-show="wishlistItems.length > 0">
                     <template x-for="item in wishlistItems" :key="item.id">
-                        <div class="flex items-center gap-4 border-b pb-4">
-                            <img :src="item.product.image || 'https://picsum.photos/80/80?random=2'" :alt="item.product.name" style="width:196px;height:196px;object-fit:cover;border-radius:0.75rem;max-width:196px;max-height:196px;">
+                        <div class="flex items-center gap-4 pb-4 border-b border-gray-200 dark:border-gray-600">
+                            <img :src="item.product.image || 'https://picsum.photos/80/80?random=2'" :alt="item.product.name" style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px; max-width: 100px; max-height: 100px;">
                             <div class="flex-1">
-                                <div class="font-semibold text-lg" x-text="item.product.name"></div>
-                                <div class="text-gray-500 text-sm" x-text="item.product.category"></div>
-                                <div class="text-primary-600 font-bold text-xl" x-text="'₦' + item.product.price"></div>
+                                <div class="font-semibold text-lg mb-1 text-gray-900 dark:text-white" x-text="item.product.name"></div>
+                                <div class="text-sm mb-2 text-gray-500 dark:text-gray-400" x-text="item.product.category"></div>
+                                <div class="text-orange-400 font-bold text-xl" x-text="'₦' + item.product.price"></div>
                             </div>
-                            <button @click="removeFromWishlist(item.product.id)" class="text-red-500 hover:text-red-700">
-                                <i class="fas fa-heart"></i>
+                            <button @click="removeFromWishlist(item.product.id)" class="text-red-500 hover:text-red-400 transition-colors">
+                                <i class="fas fa-heart text-xl"></i>
                             </button>
                         </div>
                     </template>

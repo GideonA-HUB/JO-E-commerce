@@ -193,7 +193,6 @@ class OrderViewSet(viewsets.ModelViewSet):
                 
                 return Response({
                     'order': OrderSerializer(order).data,
-                    'authorization_url': f"{settings.SITE_URL}/test-payment/",
                     'reference': f"TEST_REF_{order.id}",
                     'access_code': f"TEST_ACCESS_{order.id}",
                     'public_key': 'pk_test_placeholder',
@@ -296,39 +295,61 @@ class ProductReviewViewSet(viewsets.ModelViewSet):
         return ProductReviewSerializer
     
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            review = serializer.save()
-            
-            # Send notification email to admin
-            try:
-                send_mail(
-                    subject=f'New Product Review - {review.product.name}',
-                    message=f'''
-                    New review received:
-                    
-                    Product: {review.product.name}
-                    Customer: {review.customer_name}
-                    Rating: {review.rating}/5
-                    Comment: {review.comment}
-                    Verified Purchase: {review.is_verified_purchase}
-                    ''',
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[settings.ADMIN_EMAIL],
-                    fail_silently=True
-                )
-            except Exception as e:
-                print(f"Failed to send review notification: {e}")
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                review = serializer.save()
+                
+                # Send notification email to admin
+                try:
+                    send_mail(
+                        subject=f'New Product Review - {review.product.name}',
+                        message=f'''
+                        New review received:
+                        
+                        Product: {review.product.name}
+                        Customer: {review.customer_name}
+                        Rating: {review.rating}/5
+                        Comment: {review.comment}
+                        Verified Purchase: {review.is_verified_purchase}
+                        ''',
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[settings.ADMIN_EMAIL],
+                        fail_silently=True
+                    )
+                except Exception as e:
+                    print(f"Failed to send review notification: {e}")
+                
+                return Response({
+                    'success': True,
+                    'message': 'Review submitted successfully!'
+                }, status=status.HTTP_201_CREATED)
             
             return Response({
-                'success': True,
-                'message': 'Review submitted successfully!'
-            }, status=status.HTTP_201_CREATED)
-        
-        return Response({
-            'success': False,
-            'errors': serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+                'success': False,
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            # Check if it's a duplicate review error
+            customer_email = request.data.get('customer_email')
+            product_id = request.data.get('product')
+            
+            if customer_email and product_id:
+                existing_review = ProductReview.objects.filter(
+                    product_id=product_id,
+                    customer_email=customer_email
+                ).first()
+                
+                if existing_review:
+                    return Response({
+                        'error': 'You have already submitted a review for this product. You can only submit one review per product.'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # For other errors, return a generic message
+            return Response({
+                'error': 'Error submitting review. Please try again.'
+            }, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'])
     def by_product(self, request):
@@ -443,6 +464,31 @@ class ProductRatingViewSet(viewsets.ModelViewSet):
             return CreateProductRatingSerializer
         return ProductRatingSerializer
 
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            # Check if it's a duplicate rating error
+            user_email = request.data.get('user_email') or (request.user.email if request.user.is_authenticated else None)
+            product_id = request.data.get('product')
+            
+            if user_email and product_id:
+                # Check if user has already rated this product
+                existing_rating = ProductRating.objects.filter(
+                    product_id=product_id,
+                    user_email=user_email
+                ).first()
+                
+                if existing_rating:
+                    return Response({
+                        'error': 'You have already submitted a rating for this product. You can only submit one rating per product.'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # For other errors, return a generic message
+            return Response({
+                'error': 'Error submitting rating. Please try again.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
     def perform_create(self, serializer):
         # Handle case where user is not authenticated
         if self.request.user.is_authenticated:
@@ -470,6 +516,31 @@ class ProductCommentViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return CreateProductCommentSerializer
         return ProductCommentSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            # Check if it's a duplicate comment error
+            user_email = request.data.get('user_email') or (request.user.email if request.user.is_authenticated else None)
+            product_id = request.data.get('product')
+            
+            if user_email and product_id:
+                # Check if user has already commented on this product
+                existing_comment = ProductComment.objects.filter(
+                    product_id=product_id,
+                    user_email=user_email
+                ).first()
+                
+                if existing_comment:
+                    return Response({
+                        'error': 'You have already submitted a review for this product. You can only submit one review per product.'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # For other errors, return a generic message
+            return Response({
+                'error': 'Error submitting review. Please try again.'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
         # Handle case where user is not authenticated

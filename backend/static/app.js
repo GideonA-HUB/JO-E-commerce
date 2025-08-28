@@ -8,6 +8,9 @@ document.addEventListener('alpine:init', () => {
         cateringServices: [],
         mobileMenuOpen: false,
         
+        // Dark mode
+        isDarkMode: false,
+        
         // Search and Filter variables
         searchQuery: '',
         selectedCategory: 'all',
@@ -59,6 +62,7 @@ document.addEventListener('alpine:init', () => {
         orderError: false,
         orderErrorMessage: '',
         orderSuccessMessage: '',
+        createdOrder: null,
 
         // Product modal
         selectedProduct: null,
@@ -81,6 +85,7 @@ document.addEventListener('alpine:init', () => {
         commentError: '',
         reviewSuccess: '',
         reviewError: '',
+        hasUserReviewed: false,
 
         // Wishlist
         wishlistItems: [],
@@ -126,6 +131,10 @@ document.addEventListener('alpine:init', () => {
         init() {
             console.log('Alpine.js initialized');
             console.log('Site Settings:', this.siteSettings);
+            
+            // Initialize dark mode
+            this.initDarkMode();
+            
             this.fetchProducts();
             this.fetchCateringServices();
             this.fetchBlogPosts();
@@ -134,6 +143,34 @@ document.addEventListener('alpine:init', () => {
                 // Initialize contact form with user email
                 this.contactForm.email = this.userEmail;
                 console.log('Contact form email initialized:', this.contactForm.email);
+            }
+        },
+
+        // Dark mode methods
+        initDarkMode() {
+            // Check for saved dark mode preference or default to light mode
+            const savedMode = localStorage.getItem('darkMode');
+            this.isDarkMode = savedMode === 'true';
+            
+            // Apply dark mode on page load
+            if (this.isDarkMode) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        },
+
+        toggleDarkMode() {
+            this.isDarkMode = !this.isDarkMode;
+            
+            // Save preference to localStorage
+            localStorage.setItem('darkMode', this.isDarkMode.toString());
+            
+            // Apply dark mode to document
+            if (this.isDarkMode) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
             }
         },
 
@@ -252,6 +289,7 @@ document.addEventListener('alpine:init', () => {
             this.orderError = false;
             this.orderErrorMessage = '';
             this.orderSuccessMessage = '';
+            this.createdOrder = null;
         },
 
         // Product modal methods
@@ -265,35 +303,52 @@ document.addEventListener('alpine:init', () => {
             this.commentError = '';
             this.reviewSuccess = '';
             this.reviewError = '';
-            this.fetchRatings(product.id);
-            this.fetchComments(product.id);
+            this.hasUserReviewed = false;
+            this.fetchReviews(product.id);
+            this.checkUserReviewStatus(product.id);
         },
 
         closeProductModal() {
             this.productModalOpen = false;
             this.selectedProduct = null;
+            this.hasUserReviewed = false;
         },
 
         // Review methods
-        async fetchRatings(productId) {
+        async fetchReviews(productId) {
             try {
-                const res = await fetch(`/api/product-ratings/?product=${productId}`);
+                const res = await fetch(`/api/reviews/?product=${productId}`);
                 if (res.ok) {
-                    this.ratings = await res.json();
+                    const reviews = await res.json();
+                    this.ratings = reviews; // Keep compatibility with existing template
+                    this.comments = reviews; // Keep compatibility with existing template
                 }
             } catch (e) {
-                console.error('Error fetching ratings:', e);
+                console.error('Error fetching reviews:', e);
             }
         },
 
-        async fetchComments(productId) {
+        async checkUserReviewStatus(productId) {
+            if (!this.isAuthenticated && !this.userEmail) {
+                return;
+            }
+            
             try {
-                const res = await fetch(`/api/product-comments/?product=${productId}`);
-                if (res.ok) {
-                    this.comments = await res.json();
+                const userEmail = this.userEmail || (this.isAuthenticated ? this.userEmail : null);
+                
+                if (userEmail) {
+                    // Check unified reviews
+                    const reviewsRes = await fetch(`/api/reviews/?product=${productId}`);
+                    
+                    if (reviewsRes.ok) {
+                        const reviews = await reviewsRes.json();
+                        const userReview = reviews.find(review => review.customer_email === userEmail);
+                        
+                        this.hasUserReviewed = !!userReview;
+                    }
                 }
             } catch (e) {
-                console.error('Error fetching comments:', e);
+                console.error('Error checking user review status:', e);
             }
         },
 
@@ -312,7 +367,7 @@ document.addEventListener('alpine:init', () => {
 
             try {
                 const csrfToken = this.getCookie('csrftoken');
-                const res = await fetch('/api/product-ratings/', {
+                const res = await fetch('/api/reviews/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -320,21 +375,24 @@ document.addEventListener('alpine:init', () => {
                     },
                     body: JSON.stringify({
                         product: this.selectedProduct.id,
+                        customer_name: this.userEmail.split('@')[0], // Use email prefix as name
+                        customer_email: this.userEmail,
                         rating: this.ratingValue,
-                        user_email: this.userEmail
+                        comment: 'Rating only' // Minimal comment for rating-only submissions
                     })
                 });
 
                 if (res.ok) {
                     this.ratingValue = 0;
                     this.ratingModalOpen = false;
-                    this.fetchRatings(this.selectedProduct.id);
+                    this.fetchReviews(this.selectedProduct.id);
+                    this.checkUserReviewStatus(this.selectedProduct.id);
                 } else {
                     const error = await res.json();
-                    if (error.detail && error.detail.includes('unique')) {
-                        this.ratingError = 'You have already rated this product';
+                    if (error.error && error.error.includes('already submitted')) {
+                        this.ratingError = error.error;
                     } else {
-                        this.ratingError = 'Error submitting rating';
+                        this.ratingError = error.error || 'Error submitting rating';
                     }
                 }
             } catch (e) {
@@ -408,8 +466,8 @@ document.addEventListener('alpine:init', () => {
             try {
                 const csrfToken = this.getCookie('csrftoken');
                 
-                // Submit rating first
-                const ratingRes = await fetch('/api/product-ratings/', {
+                // Submit unified review using ProductReview model
+                const reviewRes = await fetch('/api/reviews/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -417,34 +475,22 @@ document.addEventListener('alpine:init', () => {
                     },
                     body: JSON.stringify({
                         product: this.selectedProduct.id,
+                        customer_name: this.commentName,
+                        customer_email: this.userEmail,
                         rating: this.ratingValue,
-                        user_email: this.userEmail
+                        comment: this.commentText
                     })
                 });
 
-                // Submit comment
-                const commentRes = await fetch('/api/product-comments/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify({
-                        product: this.selectedProduct.id,
-                        comment: this.commentText,
-                        user_email: this.userEmail
-                    })
-                });
-
-                if (ratingRes.ok && commentRes.ok) {
+                if (reviewRes.ok) {
                     // Clear form
                     this.commentName = '';
                     this.commentText = '';
                     this.ratingValue = 0;
                     
-                    // Refresh data
-                    this.fetchRatings(this.selectedProduct.id);
-                    this.fetchComments(this.selectedProduct.id);
+                    // Refresh data and update status
+                    this.fetchReviews(this.selectedProduct.id);
+                    this.checkUserReviewStatus(this.selectedProduct.id);
                     
                     // Show success message
                     this.reviewSuccess = 'Review submitted successfully!';
@@ -452,7 +498,14 @@ document.addEventListener('alpine:init', () => {
                         this.reviewSuccess = '';
                     }, 3000);
                 } else {
-                    this.commentError = 'Error submitting review. Please try again.';
+                    // Handle error messages
+                    const errorData = await reviewRes.json();
+                    if (errorData.error && errorData.error.includes('already submitted')) {
+                        this.commentError = errorData.error;
+                        this.hasUserReviewed = true;
+                    } else {
+                        this.commentError = errorData.error || 'Error submitting review. Please try again.';
+                    }
                 }
             } catch (e) {
                 this.commentError = 'Network error. Please try again.';
@@ -783,9 +836,10 @@ document.addEventListener('alpine:init', () => {
                     // Test mode - simulate success
                     this.orderSuccess = true;
                     this.orderSuccessMessage = 'Order placed successfully in test mode!';
+                    this.createdOrder = orderResult.order;
                     this.cart = [];
-                    this.checkoutOpen = false;
-                    this.checkoutStep = 1;
+                    // Keep modal open to show success message
+                    this.checkoutStep = 3;
                 }
 
             } catch (error) {

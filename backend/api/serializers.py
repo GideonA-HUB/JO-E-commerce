@@ -4,7 +4,7 @@ from .models import Product, Order, OrderItem, SiteSettings, CateringService, Co
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
-        fields = ['id', 'customer_name', 'rating', 'comment', 'is_verified_purchase', 'created_at']
+        fields = ['id', 'customer_name', 'customer_email', 'rating', 'comment', 'is_verified_purchase', 'created_at']
         read_only_fields = ['is_verified_purchase', 'created_at']
 
 class CreateProductReviewSerializer(serializers.ModelSerializer):
