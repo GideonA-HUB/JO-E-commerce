@@ -1,9 +1,7 @@
 #!/bin/bash
 set -e
 
-# Build script for Railway deployment
-
-echo "🚀 Starting build process..."
+echo "🚀 Starting Railway build process..."
 
 # Install dependencies
 echo "📦 Installing Python dependencies..."
@@ -17,4 +15,4 @@ python manage.py collectstatic --noinput
 echo "🗄️ Running database migrations..."
 python manage.py migrate
 
-echo "✅ Build completed successfully!"
+echo "✅ Railway build completed successfully!"
