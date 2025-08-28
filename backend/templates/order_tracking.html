@@ -1,0 +1,784 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Tracking | TASTY FINGERS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'main.css' %}" rel="stylesheet">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #ed7516 0%, #f1943d 50%, #f6bb77 100%);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #fef7ee 0%, #fdedd6 100%);
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ed7516 0%, #f1943d 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(237, 117, 22, 0.4);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #ed7516;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #ed7516;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-outline:hover {
+            background: #ed7516;
+            color: white;
+            transform: translateY(-1px);
+        }
+        .status-step {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .status-step::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: #e5e7eb;
+            border: 2px solid #d1d5db;
+        }
+        .status-step.active::before {
+            background: #ed7516;
+            border-color: #ed7516;
+        }
+        .status-step.completed::before {
+            background: #10b981;
+            border-color: #10b981;
+        }
+        .status-step::after {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 1.5rem;
+            width: 2px;
+            height: 2rem;
+            background: #e5e7eb;
+        }
+        .status-step:last-child::after {
+            display: none;
+        }
+        .status-step.completed::after {
+            background: #10b981;
+        }
+
+        /* Dark Theme Styles */
+        .dark {
+            color-scheme: dark;
+        }
+
+        .dark body {
+            background-color: #111827;
+            color: #f9fafb;
+        }
+
+        .dark nav {
+            background-color: #1f2937;
+            border-bottom: 1px solid #374151;
+        }
+
+        .dark .bg-white {
+            background-color: #1f2937;
+        }
+
+        .dark .text-gray-900 {
+            color: #f9fafb;
+        }
+
+        .dark .text-gray-700 {
+            color: #d1d5db;
+        }
+
+        .dark .text-gray-600 {
+            color: #9ca3af;
+        }
+
+        .dark .text-gray-500 {
+            color: #6b7280;
+        }
+
+        .dark .text-gray-400 {
+            color: #9ca3af;
+        }
+
+        .dark .text-gray-300 {
+            color: #d1d5db;
+        }
+
+        .dark .bg-gray-50 {
+            background-color: #111827;
+        }
+
+        .dark .bg-gray-100 {
+            background-color: #374151;
+        }
+
+        .dark .bg-gray-200 {
+            background-color: #4b5563;
+        }
+
+        .dark .bg-gray-300 {
+            background-color: #6b7280;
+        }
+
+        .dark .border-gray-200 {
+            border-color: #374151;
+        }
+
+        .dark .border-gray-300 {
+            border-color: #4b5563;
+        }
+
+        .dark .border-gray-400 {
+            border-color: #6b7280;
+        }
+
+        .dark .border-gray-600 {
+            border-color: #9ca3af;
+        }
+
+        .dark .border-gray-800 {
+            border-color: #374151;
+        }
+
+        .dark .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark .shadow-xl {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark .shadow-2xl {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+
+        .dark .card {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+        }
+
+        .dark .btn-outline {
+            border-color: #4b5563;
+            color: #d1d5db;
+        }
+
+        .dark .btn-outline:hover {
+            background-color: #374151;
+            border-color: #6b7280;
+        }
+
+        .dark input, .dark textarea, .dark select {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+
+        .dark input:focus, .dark textarea:focus, .dark select:focus {
+            border-color: #ea580c;
+            ring-color: #ea580c;
+        }
+
+        .dark .bg-gray-900 {
+            background-color: #111827;
+        }
+
+        .dark .bg-gray-800 {
+            background-color: #1f2937;
+        }
+
+        .dark .bg-blue-50 {
+            background-color: #1e3a8a;
+        }
+
+        .dark .bg-blue-100 {
+            background-color: #1e40af;
+        }
+
+        .dark .bg-green-100 {
+            background-color: #065f46;
+        }
+
+        .dark .bg-red-100 {
+            background-color: #991b1b;
+        }
+
+        .dark .bg-yellow-100 {
+            background-color: #92400e;
+        }
+
+        .dark .bg-orange-100 {
+            background-color: #9a3412;
+        }
+
+        .dark .text-blue-900 {
+            color: #dbeafe;
+        }
+
+        .dark .text-blue-700 {
+            color: #bfdbfe;
+        }
+
+        .dark .text-blue-600 {
+            color: #93c5fd;
+        }
+
+        .dark .text-green-700 {
+            color: #bbf7d0;
+        }
+
+        .dark .text-red-700 {
+            color: #fecaca;
+        }
+
+        .dark .text-yellow-700 {
+            color: #fef3c7;
+        }
+
+        .dark .text-orange-700 {
+            color: #fed7aa;
+        }
+
+        .dark .text-gray-800 {
+            color: #e5e7eb;
+        }
+
+        .dark .text-gray-700 {
+            color: #d1d5db;
+        }
+
+        .dark .text-gray-600 {
+            color: #9ca3af;
+        }
+
+        .dark .text-gray-500 {
+            color: #6b7280;
+        }
+
+        .dark .text-gray-400 {
+            color: #9ca3af;
+        }
+
+        .dark .text-gray-300 {
+            color: #d1d5db;
+        }
+
+        .dark .text-gray-200 {
+            color: #e5e7eb;
+        }
+
+        .dark .text-gray-100 {
+            color: #f3f4f6;
+        }
+
+        .dark .text-gray-50 {
+            color: #f9fafb;
+        }
+
+        .dark .text-white {
+            color: #ffffff;
+        }
+
+        .dark .text-black {
+            color: #000000;
+        }
+
+        .dark .text-primary-600 {
+            color: #ea580c;
+        }
+
+        .dark .text-primary-200 {
+            color: #fed7aa;
+        }
+
+        .dark .text-primary-500 {
+            color: #f97316;
+        }
+
+        .dark .text-primary-400 {
+            color: #fb923c;
+        }
+
+        .dark .text-primary-300 {
+            color: #fdba74;
+        }
+
+        .dark .text-primary-200 {
+            color: #fed7aa;
+        }
+
+        .dark .text-primary-100 {
+            color: #ffedd5;
+        }
+
+        .dark .text-primary-50 {
+            color: #fff7ed;
+        }
+
+        .dark .bg-primary-600 {
+            background-color: #ea580c;
+        }
+
+        .dark .bg-primary-500 {
+            background-color: #f97316;
+        }
+
+        .dark .bg-primary-400 {
+            background-color: #fb923c;
+        }
+
+        .dark .bg-primary-300 {
+            background-color: #fdba74;
+        }
+
+        .dark .bg-primary-200 {
+            background-color: #fed7aa;
+        }
+
+        .dark .bg-primary-100 {
+            background-color: #ffedd5;
+        }
+
+        .dark .bg-primary-50 {
+            background-color: #fff7ed;
+        }
+
+        .dark .border-primary-600 {
+            border-color: #ea580c;
+        }
+
+        .dark .border-primary-500 {
+            border-color: #f97316;
+        }
+
+        .dark .border-primary-400 {
+            border-color: #fb923c;
+        }
+
+        .dark .border-primary-300 {
+            border-color: #fdba74;
+        }
+
+        .dark .border-primary-200 {
+            border-color: #fed7aa;
+        }
+
+        .dark .border-primary-100 {
+            border-color: #ffedd5;
+        }
+
+        .dark .border-primary-50 {
+            border-color: #fff7ed;
+        }
+
+        .dark .ring-primary-600 {
+            --tw-ring-color: #ea580c;
+        }
+
+        .dark .ring-primary-500 {
+            --tw-ring-color: #f97316;
+        }
+
+        .dark .ring-primary-400 {
+            --tw-ring-color: #fb923c;
+        }
+
+        .dark .ring-primary-300 {
+            --tw-ring-color: #fdba74;
+        }
+
+        .dark .ring-primary-200 {
+            --tw-ring-color: #fed7aa;
+        }
+
+        .dark .ring-primary-100 {
+            --tw-ring-color: #ffedd5;
+        }
+
+        .dark .ring-primary-50 {
+            --tw-ring-color: #fff7ed;
+        }
+
+        .dark .hover\:text-primary-600:hover {
+            color: #ea580c;
+        }
+
+        .dark .hover\:bg-primary-600:hover {
+            background-color: #ea580c;
+        }
+
+        .dark .hover\:border-primary-600:hover {
+            border-color: #ea580c;
+        }
+
+        .dark .focus\:ring-primary-500:focus {
+            --tw-ring-color: #f97316;
+        }
+
+        .dark .focus\:border-primary-500:focus {
+            border-color: #f97316;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans" x-data="orderTracking()" x-init="initDarkMode()" :class="{ 'dark': isDarkMode }">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-2xl font-display font-bold text-primary-600">TASTY FINGERS</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Dark Theme Toggle -->
+                    <button @click="toggleDarkMode()" class="relative p-2 text-gray-700 hover:text-primary-600 transition-colors" title="Toggle Dark Mode">
+                        <i x-show="!isDarkMode" class="fas fa-moon text-xl"></i>
+                        <i x-show="isDarkMode" class="fas fa-sun text-xl"></i>
+                    </button>
+                    <a href="/" class="btn-outline">
+                        <i class="fas fa-home"></i>
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="min-h-screen bg-gray-50">
+        <!-- Hero Section -->
+        <section class="hero-gradient py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h1 class="text-4xl md:text-5xl font-display font-bold text-white mb-4">
+                        Track Your <span class="text-primary-200">Order</span>
+                    </h1>
+                    <p class="text-xl text-white mb-8 max-w-3xl mx-auto">
+                        Stay updated on your order status and delivery progress
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Order Tracking Section -->
+        <section class="py-16">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Search Form -->
+                <div class="card p-8 mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">Track Your Order</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                            <input type="email" x-model="searchEmail" placeholder="Enter your email address" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                        <div class="flex items-end">
+                            <button @click="searchOrders()" class="btn-primary w-full">
+                                <i class="fas fa-search"></i>
+                                Track Orders
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div x-show="loading" class="text-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                    <p class="text-gray-600">Loading your orders...</p>
+                </div>
+
+                <!-- Error State -->
+                <div x-show="error" class="card p-8 mb-8">
+                    <div class="text-center">
+                        <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Error</h3>
+                        <p class="text-gray-600 mb-4" x-text="errorMessage"></p>
+                        <button @click="clearError()" class="btn-primary">
+                            <i class="fas fa-refresh"></i>
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Orders List -->
+                <div x-show="orders.length > 0 && !loading" class="space-y-6">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">Your Orders</h2>
+                    
+                    <template x-for="order in orders" :key="order.id">
+                        <div class="card p-6">
+                            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                                        Order #<span x-text="order.id"></span>
+                                    </h3>
+                                    <p class="text-gray-600 mb-1">
+                                        <span x-text="order.first_name + ' ' + order.last_name"></span>
+                                    </p>
+                                    <p class="text-gray-600 mb-1" x-text="order.email"></p>
+                                    <p class="text-gray-600" x-text="order.phone"></p>
+                                </div>
+                                <div class="mt-4 lg:mt-0 lg:text-right">
+                                    <div class="text-2xl font-bold text-gray-900 mb-2">
+                                        ₦<span x-text="order.total_amount"></span>
+                                    </div>
+                                    <span class="px-3 py-1 text-sm font-semibold rounded-full"
+                                          :class="{
+                                              'bg-yellow-100 text-yellow-800': order.status === 'pending',
+                                              'bg-blue-100 text-blue-800': order.status === 'confirmed',
+                                              'bg-orange-100 text-orange-800': order.status === 'preparing',
+                                              'bg-green-100 text-green-800': order.status === 'ready',
+                                              'bg-gray-100 text-gray-800': order.status === 'delivered',
+                                              'bg-red-100 text-red-800': order.status === 'cancelled'
+                                          }"
+                                          x-text="order.status.charAt(0).toUpperCase() + order.status.slice(1)">
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Order Items -->
+                            <div class="mb-6">
+                                <h4 class="font-semibold text-gray-900 mb-3">Order Items</h4>
+                                <div class="space-y-2">
+                                    <template x-for="item in order.items" :key="item.id">
+                                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                            <div>
+                                                <p class="font-medium text-gray-900" x-text="item.product_name"></p>
+                                                <p class="text-sm text-gray-600">Quantity: <span x-text="item.quantity"></span></p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="font-semibold text-gray-900">₦<span x-text="item.price"></span></p>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Delivery Information -->
+                            <div class="mb-6">
+                                <h4 class="font-semibold text-gray-900 mb-3">Delivery Information</h4>
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <p class="text-gray-900 mb-1" x-text="order.address"></p>
+                                    <p class="text-gray-600 mb-1" x-text="order.city + ', ' + order.state + ' ' + order.zip_code"></p>
+                                    <template x-if="order.delivery_instructions">
+                                        <p class="text-gray-600 mt-2">
+                                            <span class="font-medium">Instructions:</span> 
+                                            <span x-text="order.delivery_instructions"></span>
+                                        </p>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Order Status Timeline -->
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-4">Order Status</h4>
+                                <div class="space-y-4">
+                                    <div class="status-step" :class="getStatusClass(order.status, 'pending')">
+                                        <div class="ml-6">
+                                            <h5 class="font-medium text-gray-900">Order Placed</h5>
+                                            <p class="text-sm text-gray-600">Your order has been received and is being processed</p>
+                                        </div>
+                                    </div>
+                                    <div class="status-step" :class="getStatusClass(order.status, 'confirmed')">
+                                        <div class="ml-6">
+                                            <h5 class="font-medium text-gray-900">Order Confirmed</h5>
+                                            <p class="text-sm text-gray-600">Payment confirmed and order is being prepared</p>
+                                        </div>
+                                    </div>
+                                    <div class="status-step" :class="getStatusClass(order.status, 'preparing')">
+                                        <div class="ml-6">
+                                            <h5 class="font-medium text-gray-900">Preparing</h5>
+                                            <p class="text-sm text-gray-600">Your food is being prepared in the kitchen</p>
+                                        </div>
+                                    </div>
+                                    <div class="status-step" :class="getStatusClass(order.status, 'ready')">
+                                        <div class="ml-6">
+                                            <h5 class="font-medium text-gray-900">Ready for Pickup</h5>
+                                            <p class="text-sm text-gray-600">Your order is ready for pickup or delivery</p>
+                                        </div>
+                                    </div>
+                                    <div class="status-step" :class="getStatusClass(order.status, 'delivered')">
+                                        <div class="ml-6">
+                                            <h5 class="font-medium text-gray-900">Delivered</h5>
+                                            <p class="text-sm text-gray-600">Your order has been delivered successfully</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Order Details -->
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="font-medium text-gray-700">Order Date:</span>
+                                        <span class="text-gray-900" x-text="formatDate(order.created_at)"></span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium text-gray-700">Last Updated:</span>
+                                        <span class="text-gray-900" x-text="formatDate(order.updated_at)"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- No Orders State -->
+                <div x-show="orders.length === 0 && !loading && !error" class="card p-8">
+                    <div class="text-center">
+                        <i class="fas fa-shopping-bag text-4xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">No Orders Found</h3>
+                        <p class="text-gray-600 mb-4">No orders found for this email address. Please check your email or place a new order.</p>
+                        <a href="/" class="btn-primary">
+                            <i class="fas fa-utensils"></i>
+                            Order Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function orderTracking() {
+            return {
+                searchEmail: '',
+                orders: [],
+                loading: false,
+                error: false,
+                errorMessage: '',
+                
+                // Dark mode
+                isDarkMode: false,
+
+                // Initialize dark mode
+                initDarkMode() {
+                    // Check for saved dark mode preference or default to light mode
+                    const savedMode = localStorage.getItem('darkMode');
+                    this.isDarkMode = savedMode === 'true';
+                    
+                    // Apply dark mode on page load
+                    if (this.isDarkMode) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                },
+
+                toggleDarkMode() {
+                    this.isDarkMode = !this.isDarkMode;
+                    
+                    // Save preference to localStorage
+                    localStorage.setItem('darkMode', this.isDarkMode.toString());
+                    
+                    // Apply dark mode to document
+                    if (this.isDarkMode) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                },
+
+                async searchOrders() {
+                    if (!this.searchEmail.trim()) {
+                        this.error = true;
+                        this.errorMessage = 'Please enter your email address';
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.error = false;
+                    this.orders = [];
+
+                    try {
+                        const response = await fetch(`/api/customer-orders/?email=${encodeURIComponent(this.searchEmail)}`);
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            this.orders = data;
+                        } else {
+                            this.error = true;
+                            this.errorMessage = data.error || 'Failed to fetch orders';
+                        }
+                    } catch (e) {
+                        this.error = true;
+                        this.errorMessage = 'Network error. Please try again.';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                getStatusClass(currentStatus, stepStatus) {
+                    const statusOrder = ['pending', 'confirmed', 'preparing', 'ready', 'delivered'];
+                    const currentIndex = statusOrder.indexOf(currentStatus);
+                    const stepIndex = statusOrder.indexOf(stepStatus);
+
+                    if (currentStatus === 'cancelled') {
+                        return stepIndex <= 1 ? 'completed' : '';
+                    }
+
+                    if (stepIndex < currentIndex) {
+                        return 'completed';
+                    } else if (stepIndex === currentIndex) {
+                        return 'active';
+                    } else {
+                        return '';
+                    }
+                },
+
+                formatDate(dateString) {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                clearError() {
+                    this.error = false;
+                    this.errorMessage = '';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

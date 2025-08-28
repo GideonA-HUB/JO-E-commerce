@@ -54,8 +54,25 @@ def main_site(request):
     
     return render(request, 'main_site.html', context)
 
+def order_tracking_page(request):
+    """Serve the order tracking page"""
+    context = {}
+    if request.user.is_authenticated:
+        context['user'] = request.user
+    
+    # Get site settings from database
+    try:
+        site_settings = SiteSettings.get_settings()
+        context['site_settings'] = site_settings
+    except:
+        # Fallback to default values if no settings exist
+        context['site_settings'] = None
+    
+    return render(request, 'order_tracking.html', context)
+
 urlpatterns = [
     path('', main_site, name='main_site'),
+    path('track-order/', order_tracking_page, name='order_tracking'),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('accounts/', include('accounts.urls')),

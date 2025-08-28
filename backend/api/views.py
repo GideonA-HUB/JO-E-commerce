@@ -881,5 +881,31 @@ def paystack_webhook(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
+@api_view(['GET'])
+def customer_orders(request):
+    """Get orders for a specific customer by email"""
+    email = request.query_params.get('email')
+    if not email:
+        return Response({'error': 'Email parameter is required'}, status=400)
+    
+    try:
+        orders = Order.objects.filter(email=email).order_by('-created_at')
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+def order_tracking(request, order_id):
+    """Get detailed order information for tracking"""
+    try:
+        order = Order.objects.get(id=order_id)
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
 
 

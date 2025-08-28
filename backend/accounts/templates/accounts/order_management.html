@@ -1,0 +1,298 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management | TASTY FINGERS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'output.css' %}" rel="stylesheet">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #ed7516 0%, #f1943d 50%, #f6bb77 100%);
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ed7516 0%, #f1943d 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #ed7516;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #ed7516;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans" x-data="orderManagement()">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-display font-bold text-primary-600">TASTY FINGERS</h1>
+                    <span class="text-sm text-gray-500 ml-2">Order Management</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'dashboard' %}" class="btn-outline">Dashboard</a>
+                    <a href="{% url 'logout' %}" class="btn-outline">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="min-h-screen bg-gray-50">
+        <!-- Hero Section -->
+        <section class="hero-gradient py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h1 class="text-4xl md:text-5xl font-display font-bold text-white mb-4">
+                        Order <span class="text-primary-200">Management</span>
+                    </h1>
+                    <p class="text-xl text-white mb-8 max-w-3xl mx-auto">
+                        Manage all customer orders and update delivery status
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section class="py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                    <div class="card p-4 text-center">
+                        <div class="text-2xl font-bold text-gray-900">{{ total_orders }}</div>
+                        <div class="text-sm text-gray-600">Total Orders</div>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <div class="text-2xl font-bold text-yellow-600">{{ pending_orders }}</div>
+                        <div class="text-sm text-gray-600">Pending</div>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <div class="text-2xl font-bold text-blue-600">{{ confirmed_orders }}</div>
+                        <div class="text-sm text-gray-600">Confirmed</div>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <div class="text-2xl font-bold text-orange-600">{{ preparing_orders }}</div>
+                        <div class="text-sm text-gray-600">Preparing</div>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <div class="text-2xl font-bold text-green-600">{{ ready_orders }}</div>
+                        <div class="text-sm text-gray-600">Ready</div>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <div class="text-2xl font-bold text-gray-600">{{ delivered_orders }}</div>
+                        <div class="text-sm text-gray-600">Delivered</div>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <div class="text-2xl font-bold text-red-600">{{ cancelled_orders }}</div>
+                        <div class="text-sm text-gray-600">Cancelled</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filters Section -->
+        <section class="py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="card p-6">
+                    <form method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                            <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name, email, phone, or order ID" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Status Filter</label>
+                            <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                <option value="">All Statuses</option>
+                                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                <option value="preparing" {% if status_filter == 'preparing' %}selected{% endif %}>Preparing</option>
+                                <option value="ready" {% if status_filter == 'ready' %}selected{% endif %}>Ready</option>
+                                <option value="delivered" {% if status_filter == 'delivered' %}selected{% endif %}>Delivered</option>
+                                <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="btn-primary w-full">
+                                <i class="fas fa-search"></i>
+                                Filter Orders
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Orders Table Section -->
+        <section class="py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="card p-6">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">All Orders</h2>
+                    
+                    {% if page_obj %}
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for order in page_obj %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ order.id }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">{{ order.first_name }} {{ order.last_name }}</div>
+                                                <div class="text-sm text-gray-500">{{ order.address|truncatechars:30 }}</div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div>
+                                                <div class="text-sm text-gray-900">{{ order.email }}</div>
+                                                <div class="text-sm text-gray-500">{{ order.phone }}</div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">₦{{ order.total_amount }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                                {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800
+                                                {% elif order.status == 'preparing' %}bg-orange-100 text-orange-800
+                                                {% elif order.status == 'ready' %}bg-green-100 text-green-800
+                                                {% elif order.status == 'delivered' %}bg-gray-100 text-gray-800
+                                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                                {{ order.status|title }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.created_at|date:"M d, Y H:i" }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <select @change="updateOrderStatus({{ order.id }}, $event.target.value)" 
+                                                    class="text-sm border border-gray-300 rounded px-2 py-1">
+                                                <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                                <option value="confirmed" {% if order.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                                <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>Preparing</option>
+                                                <option value="ready" {% if order.status == 'ready' %}selected{% endif %}>Ready</option>
+                                                <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                                <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                        <div class="mt-6 flex items-center justify-between">
+                            <div class="text-sm text-gray-700">
+                                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+                            </div>
+                            <div class="flex space-x-2">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                                       class="btn-outline px-3 py-1 text-sm">
+                                        <i class="fas fa-chevron-left"></i> Previous
+                                    </a>
+                                {% endif %}
+                                
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                                       class="btn-outline px-3 py-1 text-sm">
+                                        Next <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-12">
+                            <i class="fas fa-shopping-bag text-4xl text-gray-300 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">No Orders Found</h3>
+                            <p class="text-gray-600">No orders match your current filters.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function orderManagement() {
+            return {
+                async updateOrderStatus(orderId, newStatus) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('status', newStatus);
+                        formData.append('csrfmiddlewaretoken', this.getCookie('csrftoken'));
+
+                        const response = await fetch(`/accounts/update-order-status/${orderId}/`, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            alert(data.message);
+                            window.location.reload();
+                        } else {
+                            alert(data.error || 'Failed to update order status');
+                        }
+                    } catch (e) {
+                        alert('Error updating order status');
+                    }
+                },
+
+                getCookie(name) {
+                    let cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        const cookies = document.cookie.split(';');
+                        for (let i = 0; i < cookies.length; i++) {
+                            const cookie = cookies[i].trim();
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

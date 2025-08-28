@@ -19,4 +19,6 @@ urlpatterns = [
     path('settings/', views.site_settings, name='site-settings'),
     path('contact/', views.contact, name='contact'),
     path('paystack-webhook/', views.paystack_webhook, name='paystack-webhook'),
+    path('customer-orders/', views.customer_orders, name='customer-orders'),
+    path('order-tracking/<int:order_id>/', views.order_tracking, name='order-tracking'),
 ] 

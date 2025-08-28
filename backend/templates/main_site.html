@@ -240,6 +240,10 @@
 
                 <!-- Cart & Auth Buttons -->
                 <div class="flex items-center space-x-4">
+                    <!-- Order Tracking Icon -->
+                    <a href="{% url 'order_tracking' %}" class="relative p-2 text-gray-700 hover:text-primary-600 transition-colors" title="Track Order">
+                        <i class="fas fa-truck text-xl"></i>
+                    </a>
                     <!-- Dark Theme Toggle -->
                     <button @click="toggleDarkMode()" class="relative p-2 text-gray-700 hover:text-primary-600 transition-colors" title="Toggle Dark Mode">
                         <i x-show="!isDarkMode" class="fas fa-moon text-xl"></i>
@@ -279,6 +283,9 @@
                 <a href="#about" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">About</a>
                 <a href="#contact" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">Contact</a>
                 <a href="#blog" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">Blog</a>
+                <a href="{% url 'order_tracking' %}" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-truck mr-2"></i>Track Order
+                </a>
                 <!-- Dark Mode Toggle (Mobile) -->
                 <button @click="toggleDarkMode()" class="text-gray-700 hover:text-primary-600 block w-full text-left px-3 py-2 rounded-md text-base font-medium">
                     <i x-show="!isDarkMode" class="fas fa-moon mr-2"></i>
