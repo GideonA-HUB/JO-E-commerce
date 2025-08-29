@@ -74,21 +74,14 @@ def start_production_server():
     print("🔧 Admin panel at: https://tasty-fingers.up.railway.app/admin")
     print("📊 API endpoints at: https://tasty-fingers.up.railway.app/api/")
     
-    # Production Gunicorn configuration
+    # Simplified Production Gunicorn configuration - avoiding problematic flags
     gunicorn_cmd = [
         "gunicorn",
         "backend.wsgi:application",
         "--bind", "0.0.0.0:$PORT",
-        "--workers", "2",  # Multiple workers for concurrent requests
-        "--worker-class", "sync",
+        "--workers", "2",
         "--timeout", "120",
-        "--keep-alive", "5",
-        "--max-requests", "1000",
-        "--max-requests-jitter", "100",
-        "--log-level", "info",
-        "--access-logfile", "-",
-        "--error-logfile", "-",
-        "--preload"  # Preload application for better performance
+        "--log-level", "info"
     ]
     
     print(f"🚀 Starting: {' '.join(gunicorn_cmd)}")

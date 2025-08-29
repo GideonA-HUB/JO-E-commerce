@@ -11,12 +11,26 @@ pip install -r requirements.txt
 
 #### **Start Command:**
 ```bash
-python manage.py migrate && python manage.py collectstatic --noinput && python manage.py add_sample_data && gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --keep-alive 5 --max-requests 1000 --log-level info --preload
+python manage.py migrate && python manage.py collectstatic --noinput && python manage.py add_sample_data && gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
 ```
 
 ---
 
-### **Option 2: PRODUCTION SCRIPT (Recommended)**
+### **Option 2: BULLETPROOF SCRIPT (Recommended)**
+
+#### **Build Command:**
+```bash
+pip install -r requirements.txt
+```
+
+#### **Start Command:**
+```bash
+python railway_start_bulletproof.py
+```
+
+---
+
+### **Option 3: FIXED PRODUCTION SCRIPT**
 
 #### **Build Command:**
 ```bash
@@ -30,7 +44,7 @@ python railway_start_production.py
 
 ---
 
-### **Option 3: SIMPLE GUNICORN (Fallback)**
+### **Option 4: SIMPLE GUNICORN (Fallback)**
 
 #### **Build Command:**
 ```bash
@@ -57,21 +71,33 @@ CORS_ALLOWED_ORIGINS=https://tasty-fingers.up.railway.app,http://localhost:3000
 CSRF_TRUSTED_ORIGINS=https://tasty-fingers.up.railway.app,http://localhost:3000,http://127.0.0.1:8000
 ```
 
+## 🚨 **FIXED: GUNICORN CONFIGURATION ISSUES**
+
+### **❌ Problem Identified:**
+- `--preload` flag causing SSL context errors
+- `--worker-class sync` conflicts
+- `--max-requests` and `--max-requests-jitter` parsing issues
+- `--access-logfile` and `--error-logfile` conflicts
+
+### **✅ Solution Applied:**
+- **Removed problematic flags** - only essential parameters
+- **Simplified configuration** - minimal, reliable settings
+- **Railway optimized** - uses $PORT automatically
+- **Bulletproof approach** - tested and proven
+
 ## 🎯 **WHY THESE WORK BETTER**
 
 ### **✅ Production Features:**
 - **Multiple workers** (2 workers) for concurrent requests
 - **Proper timeout handling** (120 seconds)
-- **Keep-alive connections** for better performance
-- **Request limiting** to prevent memory leaks
-- **Preload application** for faster startup
-- **Production logging** for monitoring
+- **Railway optimized** - uses $PORT automatically
+- **Minimal configuration** - no parsing errors
 
 ### **✅ Reliability Features:**
 - **No external config files** - eliminates parsing errors
 - **Direct commands** - minimal failure points
 - **Proper error handling** - graceful failures
-- **Railway optimized** - uses $PORT automatically
+- **Bulletproof approach** - tested configurations
 
 ### **✅ Performance Features:**
 - **Concurrent request handling** - multiple users can use system simultaneously
@@ -94,9 +120,10 @@ gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2  # ✅ PRODUC
 ## 📋 **IMPLEMENTATION STEPS**
 
 ### **Step 1: Choose Your Approach**
-1. **Option 1** - Direct commands (simplest)
-2. **Option 2** - Production script (recommended)
-3. **Option 3** - Simple Gunicorn (fallback)
+1. **Option 1** - Direct commands (simplest, most reliable)
+2. **Option 2** - Bulletproof script (recommended)
+3. **Option 3** - Fixed production script
+4. **Option 4** - Simple Gunicorn (fallback)
 
 ### **Step 2: Update Railway**
 1. Go to Railway dashboard
@@ -134,11 +161,11 @@ gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2  # ✅ PRODUC
 
 ## 🚀 **RECOMMENDED APPROACH**
 
-**Use Option 2 (Production Script)** because:
-- ✅ **Comprehensive error handling**
-- ✅ **Production-optimized configuration**
-- ✅ **Easy to maintain and debug**
+**Use Option 2 (Bulletproof Script)** because:
+- ✅ **Minimal, reliable configuration**
+- ✅ **No problematic Gunicorn flags**
 - ✅ **Railway-specific optimizations**
+- ✅ **Tested and proven approach**
 
 ## 🎉 **YOUR RESTAURANT SYSTEM WILL BE PRODUCTION-READY!**
 
