@@ -23,7 +23,7 @@ CORS_ALLOWED_ORIGINS=https://tasty-fingers.up.railway.app,http://localhost:3000
 
 ### **Database (Railway provides this)**
 ```bash
-DATABASE_URL=postgresql://postgres:twnerPQrOqTIOXuMorQYOcZDJwoNahFQ@crossover.proxy.rlwy.net:18398/railway
+DATABASE_URL=YOUR_DATABASE_URL_HERE
 ```
 
 ### **Email Settings**
@@ -32,10 +32,10 @@ EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
-EMAIL_HOST_USER=gideonamienz24@gmail.com
-EMAIL_HOST_PASSWORD=bfdq jmxo ppuo izkt
-DEFAULT_FROM_EMAIL=gideonamienz24@gmail.com
-ADMIN_EMAIL=gideonamienz24@gmail.com
+EMAIL_HOST_USER=YOUR_EMAIL_HERE
+EMAIL_HOST_PASSWORD=YOUR_APP_PASSWORD_HERE
+DEFAULT_FROM_EMAIL=YOUR_EMAIL_HERE
+ADMIN_EMAIL=YOUR_EMAIL_HERE
 ```
 
 ### **Site Settings**
@@ -46,14 +46,14 @@ SITE_URL=https://tasty-fingers.up.railway.app
 
 ### **Cloudinary Settings**
 ```bash
-CLOUDINARY_CLOUD_NAME=dao40lt42
-CLOUDINARY_API_KEY=138773767419866
-CLOUDINARY_API_SECRET=Q-099CT3pgd-uHAt60xVDVRg-ok
+CLOUDINARY_CLOUD_NAME=YOUR_CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY=YOUR_CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET=YOUR_CLOUDINARY_API_SECRET
 ```
 
 ### **Security**
 ```bash
-SECRET_KEY=FPSXru8or3uzUcK-MGDbaw8LkKx0uzrqa53LTQKafoQNDv4hc7sfRGnf0pny3ZSr2mI
+SECRET_KEY=YOUR_SECRET_KEY_HERE
 ```
 
 ### **Port (Railway sets this)**
@@ -106,3 +106,7 @@ After setting up environment variables:
 - ✅ No sensitive data in code
 - ✅ All functionality works as expected
 - ✅ Security best practices followed
+
+## 🔐 **IMPORTANT SECURITY NOTE**
+
+Replace all `YOUR_*_HERE` placeholders with your actual secure credentials in Railway environment variables. Never commit actual credentials to version control!

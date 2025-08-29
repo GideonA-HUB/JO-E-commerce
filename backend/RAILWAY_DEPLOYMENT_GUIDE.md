@@ -26,29 +26,29 @@ ALLOWED_HOSTS=tasty-fingers.up.railway.app,localhost,127.0.0.1,0.0.0.0
 CORS_ALLOWED_ORIGINS=https://tasty-fingers.up.railway.app,http://localhost:3000
 
 # Database (keep your existing DATABASE_URL)
-DATABASE_URL=postgresql://postgres:twnerPQrOqTIOXuMorQYOcZDJwoNahFQ@crossover.proxy.rlwy.net:18398/railway
+DATABASE_URL=YOUR_DATABASE_URL_HERE
 
 # Email (keep your existing settings)
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
-EMAIL_HOST_USER=gideonamienz24@gmail.com
-EMAIL_HOST_PASSWORD=bfdq jmxo ppuo izkt
-DEFAULT_FROM_EMAIL=gideonamienz24@gmail.com
-ADMIN_EMAIL=gideonamienz24@gmail.com
+EMAIL_HOST_USER=YOUR_EMAIL_HERE
+EMAIL_HOST_PASSWORD=YOUR_APP_PASSWORD_HERE
+DEFAULT_FROM_EMAIL=YOUR_EMAIL_HERE
+ADMIN_EMAIL=YOUR_EMAIL_HERE
 
 # Site Settings
 SITE_NAME=TASTY FINGERS
 SITE_URL=https://tasty-fingers.up.railway.app
 
 # Cloudinary (keep your existing settings)
-CLOUDINARY_CLOUD_NAME=dao40lt42
-CLOUDINARY_API_KEY=138773767419866
-CLOUDINARY_API_SECRET=Q-099CT3pgd-uHAt60xVDVRg-ok
+CLOUDINARY_CLOUD_NAME=YOUR_CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY=YOUR_CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET=YOUR_CLOUDINARY_API_SECRET
 
 # Security
-SECRET_KEY=FPSXru8or3uzUcK-MGDbaw8LkKx0uzrqa53LTQKafoQNDv4hc7sfRGnf0pny3ZSr2mI
+SECRET_KEY=YOUR_SECRET_KEY_HERE
 
 # Port (Railway will set this automatically)
 PORT=3000
@@ -67,7 +67,7 @@ pip install -r requirements.txt && python manage.py collectstatic --noinput
 In Railway dashboard, set the **Start Command** to:
 
 ```bash
-python railway_start.py
+python railway_start_simple.py
 ```
 
 ## 🔧 **Alternative: Manual Commands**
@@ -108,7 +108,7 @@ python test_db.py && python manage.py migrate && python manage.py collectstatic 
 
 1. **Update Environment Variables** in Railway dashboard
 2. **Set Build Command**: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
-3. **Set Start Command**: `python railway_start.py`
+3. **Set Start Command**: `python railway_start_simple.py`
 4. **Deploy**
 
 ### **Option 2: Use Manual Commands**
@@ -167,6 +167,10 @@ If you continue to experience issues:
 2. Verify all environment variables are set correctly
 3. Test locally with the same configuration
 4. Contact support with specific error details
+
+## 🔐 **SECURITY IMPORTANT**
+
+Replace all `YOUR_*_HERE` placeholders with your actual secure credentials in Railway environment variables. Never commit actual credentials to version control!
 
 ---
 
