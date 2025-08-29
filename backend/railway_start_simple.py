@@ -14,8 +14,22 @@ def setup_environment():
     os.environ['DEBUG'] = 'False'
     os.environ['SECURE_SSL_REDIRECT'] = 'False'
     os.environ['CORS_ALLOW_ALL_ORIGINS'] = 'False'
-    os.environ['ALLOWED_HOSTS'] = 'tasty-fingers.up.railway.app,localhost,127.0.0.1,0.0.0.0'
-    os.environ['CORS_ALLOWED_ORIGINS'] = 'https://tasty-fingers.up.railway.app,http://localhost:3000'
+    
+    # Ensure Railway domain is in allowed hosts
+    current_hosts = os.environ.get('ALLOWED_HOSTS', '')
+    if 'tasty-fingers.up.railway.app' not in current_hosts:
+        if current_hosts:
+            os.environ['ALLOWED_HOSTS'] = f"{current_hosts},tasty-fingers.up.railway.app"
+        else:
+            os.environ['ALLOWED_HOSTS'] = 'tasty-fingers.up.railway.app,localhost,127.0.0.1,0.0.0.0'
+    
+    # Ensure CORS includes Railway domain
+    current_cors = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+    if 'https://tasty-fingers.up.railway.app' not in current_cors:
+        if current_cors:
+            os.environ['CORS_ALLOWED_ORIGINS'] = f"{current_cors},https://tasty-fingers.up.railway.app"
+        else:
+            os.environ['CORS_ALLOWED_ORIGINS'] = 'https://tasty-fingers.up.railway.app,http://localhost:3000'
     
     print("✅ Environment variables set")
 

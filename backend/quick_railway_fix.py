@@ -64,7 +64,7 @@ def generate_railway_commands():
     print("pip install -r requirements.txt && python manage.py collectstatic --noinput")
     
     print("\n🚀 START COMMAND (Option 1 - Recommended):")
-    print("python railway_start.py")
+    print("python railway_start_simple.py")
     
     print("\n🚀 START COMMAND (Option 2 - Manual):")
     print("python test_db.py && python manage.py migrate && python manage.py collectstatic --noinput && python manage.py add_sample_data && gunicorn backend.wsgi --config railway_gunicorn.conf.py --bind 0.0.0.0:3000 --workers 1 --timeout 120 --log-level info")
@@ -80,21 +80,21 @@ def generate_env_vars():
         'CORS_ALLOW_ALL_ORIGINS': 'False',
         'ALLOWED_HOSTS': 'tasty-fingers.up.railway.app,localhost,127.0.0.1,0.0.0.0',
         'CORS_ALLOWED_ORIGINS': 'https://tasty-fingers.up.railway.app,http://localhost:3000',
-        'DATABASE_URL': 'postgresql://postgres:twnerPQrOqTIOXuMorQYOcZDJwoNahFQ@crossover.proxy.rlwy.net:18398/railway',
+        'DATABASE_URL': 'YOUR_DATABASE_URL_HERE',
         'EMAIL_BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
         'EMAIL_HOST': 'smtp.gmail.com',
         'EMAIL_PORT': '587',
         'EMAIL_USE_TLS': 'True',
-        'EMAIL_HOST_USER': 'gideonamienz24@gmail.com',
-        'EMAIL_HOST_PASSWORD': 'bfdq jmxo ppuo izkt',
-        'DEFAULT_FROM_EMAIL': 'gideonamienz24@gmail.com',
-        'ADMIN_EMAIL': 'gideonamienz24@gmail.com',
+        'EMAIL_HOST_USER': 'YOUR_EMAIL_HERE',
+        'EMAIL_HOST_PASSWORD': 'YOUR_APP_PASSWORD_HERE',
+        'DEFAULT_FROM_EMAIL': 'YOUR_EMAIL_HERE',
+        'ADMIN_EMAIL': 'YOUR_EMAIL_HERE',
         'SITE_NAME': 'TASTY FINGERS',
         'SITE_URL': 'https://tasty-fingers.up.railway.app',
-        'CLOUDINARY_CLOUD_NAME': 'dao40lt42',
-        'CLOUDINARY_API_KEY': '138773767419866',
-        'CLOUDINARY_API_SECRET': 'Q-099CT3pgd-uHAt60xVDVRg-ok',
-        'SECRET_KEY': 'FPSXru8or3uzUcK-MGDbaw8LkKx0uzrqa53LTQKafoQNDv4hc7sfRGnf0pny3ZSr2mI',
+        'CLOUDINARY_CLOUD_NAME': 'YOUR_CLOUDINARY_CLOUD_NAME',
+        'CLOUDINARY_API_KEY': 'YOUR_CLOUDINARY_API_KEY',
+        'CLOUDINARY_API_SECRET': 'YOUR_CLOUDINARY_API_SECRET',
+        'SECRET_KEY': 'YOUR_SECRET_KEY_HERE',
         'PORT': '3000'
     }
     
@@ -116,6 +116,7 @@ def main():
     print("3. Redeploy your application")
     print("4. Test your Railway URL - should work without 301 redirects!")
     print("\n🎯 Expected Result: Direct access to https://tasty-fingers.up.railway.app")
+    print("\n🔒 SECURITY NOTE: Replace all 'YOUR_*_HERE' values with your actual secure credentials!")
 
 if __name__ == '__main__':
     main()
