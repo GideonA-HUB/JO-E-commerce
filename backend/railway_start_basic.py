@@ -31,6 +31,9 @@ def setup_environment():
         else:
             os.environ['CORS_ALLOWED_ORIGINS'] = 'https://tasty-fingers.up.railway.app,http://localhost:3000'
     
+    # Set CSRF trusted origins
+    os.environ['CSRF_TRUSTED_ORIGINS'] = 'https://tasty-fingers.up.railway.app,http://localhost:3000,http://127.0.0.1:8000'
+    
     print("✅ Environment variables set")
 
 def run_commands():

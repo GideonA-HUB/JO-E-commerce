@@ -19,6 +19,7 @@ CORS_ALLOW_ALL_ORIGINS=False
 ```bash
 ALLOWED_HOSTS=tasty-fingers.up.railway.app,localhost,127.0.0.1,0.0.0.0
 CORS_ALLOWED_ORIGINS=https://tasty-fingers.up.railway.app,http://localhost:3000
+CSRF_TRUSTED_ORIGINS=https://tasty-fingers.up.railway.app,http://localhost:3000,http://127.0.0.1:8000
 ```
 
 ### **Database (Railway provides this)**
