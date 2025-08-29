@@ -18,9 +18,9 @@ document.addEventListener('alpine:init', () => {
         maxPrice: '',
         categories: [
             { value: 'all', label: 'All' },
-            { value: 'finger-foods', label: 'Finger Foods' },
-            { value: 'beverages', label: 'Beverages' },
-            { value: 'desserts', label: 'Desserts' }
+            { value: 'daily-meals', label: 'Daily Affordable Meals' },
+            { value: 'food-bowls', label: 'Food Bowls' },
+            { value: 'beverages-treats', label: 'Beverages & Treats' }
         ],
         
         siteSettings: siteSettings || {
