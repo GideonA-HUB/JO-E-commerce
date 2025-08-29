@@ -219,7 +219,7 @@
                     <i class="fas fa-shopping-bag"></i>
                     Orders
                 </a>
-                {% if request.user.profile.role == 'owner' %}
+                {% if request.user.profile.role == 'owner' or request.user.is_superuser or is_owner %}
                 <a href="{% url 'staff_management' %}" class="nav-item">
                     <i class="fas fa-users"></i>
                     Staff Management
@@ -233,11 +233,6 @@
                     <i class="fas fa-user-friends"></i>
                     Subscribers
                 </a>
-                
-                <!-- Debug info - remove after testing -->
-                <div class="px-4 py-2 text-xs text-gray-500">
-                    Current role: {{ request.user.profile.role }}
-                </div>
                 
                 <div class="mt-8 px-4">
                     <a href="{% url 'logout' %}" class="nav-item text-red-600 hover:bg-red-50 hover:text-red-700">
