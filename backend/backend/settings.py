@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here-
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 # Get allowed hosts from environment variable
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,testserver').split(',')
 
 # Application definition
 
@@ -146,6 +146,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# URL settings to prevent unnecessary redirects
+APPEND_SLASH = False  # Disable automatic trailing slash redirects
+
 # REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -166,8 +169,16 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_SECONDS = 31536000
-    SECURE_REDIRECT_EXEMPT = []
-    SECURE_SSL_REDIRECT = True
+    SECURE_REDIRECT_EXEMPT = [
+        r'^/api/.*$',  # Exempt API endpoints from SSL redirect
+        r'^/admin/.*$',  # Exempt admin from SSL redirect
+        r'^/static/.*$',  # Exempt static files from SSL redirect
+        r'^/media/.*$',  # Exempt media files from SSL redirect
+        r'^/$',  # Exempt root from SSL redirect
+        r'^/track-order/.*$',  # Exempt track-order from SSL redirect
+    ]
+    # Disable SSL redirect for Railway (Railway handles HTTPS)
+    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_PRELOAD = True
@@ -181,6 +192,8 @@ if not DEBUG:
 else:
     # Development settings
     CORS_ALLOW_ALL_ORIGINS = True
+    # Disable SSL redirect in development
+    SECURE_SSL_REDIRECT = False
 
 # Session settings for separate admin and customer sessions
 SESSION_COOKIE_NAME = 'sessionid'
