@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-Simple Railway startup script for TASTY FINGERS
-Uses main settings with environment overrides
+Ultra-simple Railway startup script for TASTY FINGERS
+Minimal configuration to avoid any issues
 """
 import os
 import sys
@@ -36,27 +36,35 @@ def setup_environment():
 def run_commands():
     """Run all necessary commands"""
     print("🗄️ Running database migrations...")
-    os.system("python manage.py migrate")
+    result = os.system("python manage.py migrate")
+    if result != 0:
+        print("⚠️ Migration warning (continuing anyway)")
     
     print("📦 Collecting static files...")
-    os.system("python manage.py collectstatic --noinput")
+    result = os.system("python manage.py collectstatic --noinput")
+    if result != 0:
+        print("⚠️ Static collection warning (continuing anyway)")
     
     print("🎯 Adding sample data...")
-    os.system("python manage.py add_sample_data")
+    result = os.system("python manage.py add_sample_data")
+    if result != 0:
+        print("⚠️ Sample data warning (continuing anyway)")
 
 def start_server():
-    """Start the Gunicorn server"""
+    """Start the Gunicorn server with minimal configuration"""
     print("🌐 Starting Gunicorn server...")
     print("✅ Server should now be running without 301 redirects!")
     print("📍 Access your application at: https://tasty-fingers.up.railway.app")
     print("🔧 Admin panel at: https://tasty-fingers.up.railway.app/admin")
     print("📊 API endpoints at: https://tasty-fingers.up.railway.app/api/")
     
-    # Start Gunicorn with Railway configuration
-    os.system("gunicorn backend.wsgi --config railway_gunicorn.conf.py")
+    # Start Gunicorn with minimal configuration to avoid any issues
+    cmd = "gunicorn backend.wsgi --bind 0.0.0.0:3000 --workers 1 --timeout 120 --log-level info --access-logfile - --error-logfile -"
+    print(f"Running: {cmd}")
+    os.system(cmd)
 
 if __name__ == '__main__':
-    print("🚀 Starting TASTY FINGERS on Railway (Simple Mode)...")
+    print("🚀 Starting TASTY FINGERS on Railway (Ultra-Simple Mode)...")
     print("=" * 60)
     
     setup_environment()

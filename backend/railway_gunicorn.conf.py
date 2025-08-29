@@ -47,8 +47,8 @@ limit_request_field_size = 8190
 # Preload app for better performance
 preload_app = True
 
-# Railway-specific settings
-forwarded_allow_ips = ['127.0.0.1', '::1', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']
+# Railway-specific settings - Fixed: use string instead of list
+forwarded_allow_ips = "127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
 secure_scheme_headers = {
     'X-FORWARDED-PROTOCOL': 'ssl',
     'X-FORWARDED-PROTO': 'https',
