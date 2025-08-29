@@ -17,9 +17,9 @@ class Command(BaseCommand):
         
         # Create categories
         categories = [
-            {'name': 'Finger Foods', 'slug': 'finger-foods'},
-            {'name': 'Beverages', 'slug': 'beverages'},
-            {'name': 'Desserts', 'slug': 'desserts'},
+            {'name': 'Daily Affordable Meals', 'slug': 'daily-meals'},
+            {'name': 'Food Bowls', 'slug': 'food-bowls'},
+            {'name': 'Beverages & Treats', 'slug': 'beverages-treats'},
         ]
         
         for cat_data in categories:
@@ -36,29 +36,43 @@ class Command(BaseCommand):
                 'name': 'Chicken Wings',
                 'description': 'Crispy fried chicken wings with special seasoning',
                 'price': 15.99,
-                'category': 'finger-foods',
+                'category': 'daily-meals',
                 'image': 'https://images.unsplash.com/photo-1567620832904-9fc6debc209f?w=400'
             },
             {
                 'name': 'Beef Sliders',
                 'description': 'Mini beef burgers with cheese and special sauce',
                 'price': 12.99,
-                'category': 'finger-foods',
+                'category': 'daily-meals',
                 'image': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400'
             },
             {
                 'name': 'Fresh Juice',
                 'description': 'Freshly squeezed orange juice',
                 'price': 5.99,
-                'category': 'beverages',
+                'category': 'beverages-treats',
                 'image': 'https://images.unsplash.com/photo-1622597480248-ec889cbde4b5?w=400'
             },
             {
                 'name': 'Chocolate Cake',
                 'description': 'Rich chocolate cake with cream filling',
                 'price': 8.99,
-                'category': 'desserts',
+                'category': 'beverages-treats',
                 'image': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400'
+            },
+            {
+                'name': 'Buddha Bowl',
+                'description': 'Healthy grain bowl with vegetables and protein',
+                'price': 18.99,
+                'category': 'food-bowls',
+                'image': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400'
+            },
+            {
+                'name': 'Poke Bowl',
+                'description': 'Fresh fish bowl with rice and vegetables',
+                'price': 22.99,
+                'category': 'food-bowls',
+                'image': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'
             },
         ]
         

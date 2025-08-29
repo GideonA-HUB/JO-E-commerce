@@ -20,9 +20,9 @@ class Category(models.Model):
 
 class Product(models.Model):
     CATEGORY_CHOICES = [
-        ('finger-foods', 'Finger Foods'),
-        ('beverages', 'Beverages'),
-        ('desserts', 'Desserts'),
+        ('daily-meals', 'Daily Affordable Meals'),
+        ('food-bowls', 'Food Bowls'),
+        ('beverages-treats', 'Beverages & Treats'),
     ]
     
     name = models.CharField(max_length=200)
