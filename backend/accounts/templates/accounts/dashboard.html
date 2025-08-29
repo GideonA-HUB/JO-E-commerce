@@ -10,38 +10,55 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        :root {
+            --primary-color: #ed7516;
+            --primary-dark: #de5a0c;
+            --primary-light: #fef7ee;
+            --secondary-color: #22c55e;
+            --accent-color: #f59e0b;
         }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #fef7ee 0%, #f0fdf4 100%);
+        }
+        
         .card-hover {
             transition: all 0.3s ease;
         }
+        
         .card-hover:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
+        
         .stat-card {
-            background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+            background: linear-gradient(135deg, #fff 0%, #fef7ee 100%);
             border: 1px solid #e2e8f0;
         }
+        
         .chart-container {
             position: relative;
             height: 300px;
         }
+        
         .activity-item {
-            border-left: 3px solid #3b82f6;
+            border-left: 3px solid var(--primary-color);
             padding-left: 1rem;
             margin-bottom: 1rem;
         }
+        
         .activity-item.success {
-            border-left-color: #10b981;
+            border-left-color: var(--secondary-color);
         }
+        
         .activity-item.warning {
-            border-left-color: #f59e0b;
+            border-left-color: var(--accent-color);
         }
+        
         .activity-item.danger {
             border-left-color: #ef4444;
         }
+        
         .notification-badge {
             position: absolute;
             top: -5px;
@@ -56,70 +73,170 @@
             align-items: center;
             justify-content: center;
         }
+        
+        .btn-primary-admin {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary-admin:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary-admin {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-secondary-admin:hover {
+            background-color: #16a34a;
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline-admin {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-outline-admin:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 40;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            background: #f8fafc;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+        
+        .content-area {
+            padding: 2rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+        
+        .nav-item.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+        
+        .nav-item i {
+            width: 20px;
+            margin-right: 0.75rem;
+        }
+        
+        .brand-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: var(--primary-light);
+        }
+        
+        .brand-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .brand-subtitle {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin: 0.25rem 0 0 0;
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
-    <div class="flex h-screen">
-        <!-- Header -->
-        <div class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
-            <div class="flex items-center justify-between px-6 py-4">
-                <div class="flex items-center">
-                    <div class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-lg">
-                        TURBO ADMIN
-                    </div>
-                    <div class="ml-4 bg-blue-100 text-blue-700 px-3 py-1 rounded-lg flex items-center">
-                        <i class="fas fa-arrow-left mr-2"></i>
-                        Dashboard
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <button class="bg-blue-100 p-2 rounded-lg relative">
-                            <i class="fas fa-bell text-blue-600"></i>
-                            <span class="notification-badge">6</span>
-                        </button>
-                    </div>
-                    <button class="bg-blue-100 p-2 rounded-lg">
-                        <i class="fas fa-th-large text-blue-600"></i>
-                    </button>
-                    <button class="bg-blue-100 p-2 rounded-lg">
-                        <i class="fas fa-user text-blue-600"></i>
-                    </button>
-                    <button class="bg-blue-100 p-2 rounded-lg">
-                        <i class="fas fa-cog text-blue-600"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
+    <div class="flex">
         <!-- Sidebar -->
-        <div class="w-64 bg-white shadow-lg fixed left-0 top-16 h-full overflow-y-auto">
-            <nav class="mt-6">
-                <a href="{% url 'dashboard' %}" class="flex items-center px-6 py-3 text-gray-700 bg-gray-100 border-r-4 border-blue-500">
-                    <i class="fas fa-tachometer-alt w-5 h-5 mr-3"></i>
+        <div class="sidebar">
+            <div class="brand-section">
+                <h1 class="brand-title">TASTY FINGERS</h1>
+                <p class="brand-subtitle">Admin Dashboard</p>
+            </div>
+            
+            <nav class="mt-4">
+                <a href="{% url 'dashboard' %}" class="nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
                     Dashboard
                 </a>
-                <a href="{% url 'order_management' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100">
-                    <i class="fas fa-shopping-bag w-5 h-5 mr-3"></i>
+                <a href="{% url 'order_management' %}" class="nav-item">
+                    <i class="fas fa-shopping-bag"></i>
                     Orders
                 </a>
                 {% if request.user.profile.role == 'owner' %}
-                <a href="{% url 'staff_management' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100">
-                    <i class="fas fa-users w-5 h-5 mr-3"></i>
+                <a href="{% url 'staff_management' %}" class="nav-item">
+                    <i class="fas fa-users"></i>
                     Staff Management
                 </a>
                 {% endif %}
-                <a href="{% url 'newsletter_management' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100">
-                    <i class="fas fa-envelope w-5 h-5 mr-3"></i>
+                <a href="{% url 'newsletter_management' %}" class="nav-item">
+                    <i class="fas fa-envelope"></i>
                     Newsletter
                 </a>
-                <a href="{% url 'subscriber_management' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100">
-                    <i class="fas fa-user-friends w-5 h-5 mr-3"></i>
+                <a href="{% url 'subscriber_management' %}" class="nav-item">
+                    <i class="fas fa-user-friends"></i>
                     Subscribers
                 </a>
-                <div class="mt-8 px-6">
-                    <a href="{% url 'logout' %}" class="flex items-center px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg">
-                        <i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i>
+                
+                <div class="mt-8 px-4">
+                    <a href="{% url 'logout' %}" class="nav-item text-red-600 hover:bg-red-50 hover:text-red-700">
+                        <i class="fas fa-sign-out-alt"></i>
                         Logout
                     </a>
                 </div>
@@ -127,204 +244,271 @@
         </div>
 
         <!-- Main Content -->
-        <div class="ml-64 mt-16 flex-1 p-8">
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-                <p class="text-gray-600">Welcome back, {{ request.user.get_full_name|default:request.user.username }}!</p>
-            </div>
-
-            <!-- Key Metrics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="stat-card p-6 rounded-lg shadow-sm card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600 mb-1">Total Orders</p>
-                            <p class="text-3xl font-bold text-gray-900">{{ total_orders }}</p>
-                            <p class="text-xs text-gray-500 mt-1">See detailed report</p>
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-lg">
+                            TURBO ADMIN
                         </div>
-                        <div class="p-3 bg-blue-100 rounded-lg">
-                            <i class="fas fa-chart-bar text-blue-600 text-xl"></i>
+                        <div class="ml-4 bg-orange-100 text-orange-700 px-3 py-1 rounded-lg flex items-center">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Dashboard
                         </div>
                     </div>
-                </div>
-
-                <div class="stat-card p-6 rounded-lg shadow-sm card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600 mb-1">Pending Orders</p>
-                            <p class="text-3xl font-bold text-gray-900">{{ pending_orders }}</p>
-                            <p class="text-xs text-gray-500 mt-1">Product-wise sales</p>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button class="bg-orange-100 p-2 rounded-lg relative">
+                                <i class="fas fa-bell text-orange-600"></i>
+                                <span class="notification-badge">6</span>
+                            </button>
                         </div>
-                        <div class="p-3 bg-green-100 rounded-lg">
-                            <i class="fas fa-shopping-cart text-green-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stat-card p-6 rounded-lg shadow-sm card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600 mb-1">Total Revenue</p>
-                            <p class="text-3xl font-bold text-gray-900">₦{{ total_revenue|floatformat:0 }}</p>
-                            <p class="text-xs text-gray-500 mt-1">Weekly sales</p>
-                        </div>
-                        <div class="p-3 bg-yellow-100 rounded-lg">
-                            <i class="fas fa-dollar-sign text-yellow-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stat-card p-6 rounded-lg shadow-sm card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600 mb-1">Staff Members</p>
-                            <p class="text-3xl font-bold text-gray-900">{{ staff_count }}</p>
-                            <p class="text-xs text-gray-500 mt-1">Just Updated</p>
-                        </div>
-                        <div class="p-3 bg-purple-100 rounded-lg">
-                            <i class="fab fa-twitter text-purple-600 text-xl"></i>
-                        </div>
+                        <button class="bg-orange-100 p-2 rounded-lg">
+                            <i class="fas fa-th-large text-orange-600"></i>
+                        </button>
+                        <button class="bg-orange-100 p-2 rounded-lg">
+                            <i class="fas fa-user text-orange-600"></i>
+                        </button>
+                        <button class="bg-orange-100 p-2 rounded-lg">
+                            <i class="fas fa-cog text-orange-600"></i>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Charts Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <!-- Sales Trend Chart -->
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Sales Trend</h3>
-                    <div class="chart-container">
-                        <canvas id="salesChart"></canvas>
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+                    <p class="text-gray-600">Welcome back, {{ request.user.get_full_name|default:request.user.username }}!</p>
+                </div>
+
+                <!-- Key Metrics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card p-6 rounded-lg shadow-sm card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 mb-1">Total Orders</p>
+                                <p class="text-3xl font-bold text-gray-900">{{ total_orders }}</p>
+                                <p class="text-xs text-gray-500 mt-1">See detailed report</p>
+                            </div>
+                            <div class="p-3 bg-orange-100 rounded-lg">
+                                <i class="fas fa-chart-bar text-orange-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card p-6 rounded-lg shadow-sm card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 mb-1">Pending Orders</p>
+                                <p class="text-3xl font-bold text-gray-900">{{ pending_orders }}</p>
+                                <p class="text-xs text-gray-500 mt-1">Product-wise sales</p>
+                            </div>
+                            <div class="p-3 bg-green-100 rounded-lg">
+                                <i class="fas fa-shopping-cart text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card p-6 rounded-lg shadow-sm card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 mb-1">Total Revenue</p>
+                                <p class="text-3xl font-bold text-gray-900">₦{{ total_revenue|floatformat:0 }}</p>
+                                <p class="text-xs text-gray-500 mt-1">Weekly sales</p>
+                            </div>
+                            <div class="p-3 bg-yellow-100 rounded-lg">
+                                <i class="fas fa-dollar-sign text-yellow-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card p-6 rounded-lg shadow-sm card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 mb-1">Staff Members</p>
+                                <p class="text-3xl font-bold text-gray-900">{{ staff_count }}</p>
+                                <p class="text-xs text-gray-500 mt-1">Just Updated</p>
+                            </div>
+                            <div class="p-3 bg-purple-100 rounded-lg">
+                                <i class="fas fa-users text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Region-wise Sales Chart -->
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue Distribution</h3>
-                    <div class="chart-container">
-                        <canvas id="revenueChart"></canvas>
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Sales Trend Chart -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Sales Trend</h3>
+                        <div class="chart-container">
+                            <canvas id="salesChart"></canvas>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Data Lists Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Recent Orders -->
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Orders</h3>
-                    <p class="text-sm text-gray-500 mb-4">New orders on {{ "now"|date:"F d, Y" }}</p>
-                    <div class="space-y-4">
-                        {% for order in recent_orders %}
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center">
-                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-xs font-bold text-blue-600">#{{ order.id }}</span>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ order.customer_name|default:"Customer" }}</p>
-                                    <p class="text-sm text-gray-600">₦{{ order.total_amount }}</p>
-                                </div>
-                            </div>
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
-                                {% elif order.status == 'completed' %}bg-green-100 text-green-800
-                                {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                {{ order.status|title }}
-                            </span>
+                    <!-- Revenue Distribution Chart -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
                         </div>
-                        {% empty %}
-                        <div class="text-center py-8">
-                            <i class="fas fa-inbox text-gray-300 text-4xl mb-2"></i>
-                            <p class="text-gray-500">No recent orders</p>
-                        </div>
-                        {% endfor %}
                     </div>
                 </div>
 
-                <!-- Task List -->
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Task List</h3>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center">
-                                <input type="checkbox" class="mr-3">
-                                <span class="text-sm">Review pending orders</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <button class="text-blue-600 hover:text-blue-800">
-                                    <i class="fas fa-wrench"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-800">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
+                <!-- Data Lists Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Recent Orders -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Recent Orders</h3>
+                            <a href="{% url 'order_management' %}" class="btn-primary-admin text-sm">
+                                View All Orders
+                            </a>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center">
-                                <input type="checkbox" class="mr-3">
-                                <span class="text-sm">Send newsletter campaign</span>
+                        <p class="text-sm text-gray-500 mb-4">New orders on {{ "now"|date:"F d, Y" }}</p>
+                        <div class="space-y-4">
+                            {% for order in recent_orders %}
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                                        <span class="text-xs font-bold text-orange-600">#{{ order.id }}</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ order.customer_name|default:"Customer" }}</p>
+                                        <p class="text-sm text-gray-600">₦{{ order.total_amount }}</p>
+                                    </div>
+                                </div>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                    {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif order.status == 'completed' %}bg-green-100 text-green-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ order.status|title }}
+                                </span>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <button class="text-blue-600 hover:text-blue-800">
-                                    <i class="fas fa-wrench"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-800">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                            {% empty %}
+                            <div class="text-center py-8">
+                                <i class="fas fa-inbox text-gray-300 text-4xl mb-2"></i>
+                                <p class="text-gray-500">No recent orders</p>
                             </div>
+                            {% endfor %}
                         </div>
-                        {% if request.user.profile.role == 'owner' %}
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center">
-                                <input type="checkbox" class="mr-3">
-                                <span class="text-sm">Review staff performance</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <button class="text-blue-600 hover:text-blue-800">
-                                    <i class="fas fa-wrench"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-800">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                        {% endif %}
                     </div>
-                </div>
 
-                <!-- Activities -->
-                <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Activities</h3>
-                    <div class="space-y-4">
-                        {% for order in recent_orders %}
-                        <div class="activity-item">
-                            <div class="flex items-start">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3"></div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900">New order #{{ order.id }} received</p>
-                                    <p class="text-xs text-gray-500">{{ order.created_at|timesince }} ago</p>
+                    <!-- Recent Subscribers -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Recent Subscribers</h3>
+                            <a href="{% url 'subscriber_management' %}" class="btn-secondary-admin text-sm">
+                                View All Subscribers
+                            </a>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-4">New subscribers on {{ "now"|date:"F d, Y" }}</p>
+                        <div class="space-y-4">
+                            {% for subscriber in recent_subscribers %}
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user text-green-600 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ subscriber.email }}</p>
+                                        <p class="text-sm text-gray-600">{{ subscriber.subscribed_at|date:"M d, Y" }}</p>
+                                    </div>
                                 </div>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                    {% if subscriber.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ subscriber.is_active|yesno:"Active,Inactive" }}
+                                </span>
                             </div>
-                        </div>
-                        {% endfor %}
-                        {% for contact in recent_contacts %}
-                        <div class="activity-item">
-                            <div class="flex items-start">
-                                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3"></div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900">New contact from {{ contact.first_name|default:contact.email }}</p>
-                                    <p class="text-xs text-gray-500">{{ contact.created_at|timesince }} ago</p>
-                                </div>
+                            {% empty %}
+                            <div class="text-center py-8">
+                                <i class="fas fa-user-friends text-gray-300 text-4xl mb-2"></i>
+                                <p class="text-gray-500">No recent subscribers</p>
                             </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
-                        {% if not recent_orders and not recent_contacts %}
-                        <div class="text-center py-8">
-                            <i class="fas fa-clock text-gray-300 text-4xl mb-2"></i>
-                            <p class="text-gray-500">No recent activities</p>
-                        </div>
-                        {% endif %}
                     </div>
+
+                    <!-- Staff Management (Owner Only) -->
+                    {% if request.user.profile.role == 'owner' %}
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Staff Management</h3>
+                            <a href="{% url 'staff_management' %}" class="btn-outline-admin text-sm">
+                                Manage Staff
+                            </a>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-4">Staff overview</p>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-users text-purple-600 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Total Staff</p>
+                                        <p class="text-sm text-gray-600">{{ staff_count }} members</p>
+                                    </div>
+                                </div>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                    Active
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-plus text-orange-600 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Add New Staff</p>
+                                        <p class="text-sm text-gray-600">Create staff account</p>
+                                    </div>
+                                </div>
+                                <a href="{% url 'staff_management' %}" class="btn-primary-admin text-xs">
+                                    Add Staff
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Activities for Staff -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Activities</h3>
+                        <div class="space-y-4">
+                            {% for order in recent_orders %}
+                            <div class="activity-item">
+                                <div class="flex items-start">
+                                    <div class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3"></div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">New order #{{ order.id }} received</p>
+                                        <p class="text-xs text-gray-500">{{ order.created_at|timesince }} ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% for contact in recent_contacts %}
+                            <div class="activity-item">
+                                <div class="flex items-start">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3"></div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">New contact from {{ contact.first_name|default:contact.email }}</p>
+                                        <p class="text-xs text-gray-500">{{ contact.created_at|timesince }} ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% if not recent_orders and not recent_contacts %}
+                            <div class="text-center py-8">
+                                <i class="fas fa-clock text-gray-300 text-4xl mb-2"></i>
+                                <p class="text-gray-500">No recent activities</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -343,14 +527,14 @@
                 datasets: [{
                     label: 'Orders',
                     data: [totalOrders, totalOrders + 2, totalOrders + 5, totalOrders + 3, totalOrders + 7, totalOrders + 4, totalOrders + 6, totalOrders + 8, totalOrders + 5, totalOrders + 9, totalOrders + 7, totalOrders + 10],
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: '#ed7516',
+                    backgroundColor: 'rgba(237, 117, 22, 0.1)',
                     tension: 0.4
                 }, {
                     label: 'Revenue',
                     data: [totalRevenue, totalRevenue + 5000, totalRevenue + 8000, totalRevenue + 6000, totalRevenue + 10000, totalRevenue + 7000, totalRevenue + 9000, totalRevenue + 12000, totalRevenue + 8000, totalRevenue + 11000, totalRevenue + 9000, totalRevenue + 13000],
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
                     tension: 0.4
                 }]
             },
@@ -379,10 +563,10 @@
                 datasets: [{
                     data: [45, 25, 20, 10],
                     backgroundColor: [
-                        '#06b6d4',
-                        '#3b82f6',
+                        '#ed7516',
+                        '#22c55e',
                         '#f59e0b',
-                        '#e5e7eb'
+                        '#6b7280'
                     ]
                 }]
             },
