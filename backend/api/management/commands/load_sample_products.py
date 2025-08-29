@@ -43,9 +43,37 @@ class Command(BaseCommand):
             },
             {
                 'name': 'French Fries',
-                'description': 'Crispy golden french fries',
+                'description': 'Crispy golden french fries with seasoning',
+                'price': 8.99,
+                'category': 'sides-addons',
+                'image': 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400'
+            },
+            {
+                'name': 'Onion Rings',
+                'description': 'Crispy battered onion rings',
+                'price': 9.99,
+                'category': 'sides-addons',
+                'image': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400'
+            },
+            {
+                'name': 'Coleslaw',
+                'description': 'Fresh cabbage coleslaw with creamy dressing',
+                'price': 6.99,
+                'category': 'sides-addons',
+                'image': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400'
+            },
+            {
+                'name': 'Mozzarella Sticks',
+                'description': 'Crispy breaded mozzarella sticks with marinara sauce',
+                'price': 12.99,
+                'category': 'sides-addons',
+                'image': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400'
+            },
+            {
+                'name': 'Garlic Bread',
+                'description': 'Toasted garlic bread with herbs and butter',
                 'price': 7.99,
-                'category': 'daily-meals',
+                'category': 'sides-addons',
                 'image': 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400'
             },
             {

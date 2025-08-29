@@ -344,7 +344,7 @@
             <div class="text-center mb-16">
                 <h2 class="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4">Our Menu</h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Discover our delicious selection of daily affordable meals, food bowls, and beverages & treats
+                    Discover our delicious selection of daily affordable meals, food bowls, beverages & treats, and sides & add-ons
                 </p>
             </div>
 
@@ -362,6 +362,7 @@
                 <button @click="activeCategory = 'daily-meals'; selectedCategory = 'daily-meals'; fetchProducts()" :class="activeCategory === 'daily-meals' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Daily Affordable Meals</button>
                 <button @click="activeCategory = 'food-bowls'; selectedCategory = 'food-bowls'; fetchProducts()" :class="activeCategory === 'food-bowls' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Food Bowls</button>
                 <button @click="activeCategory = 'beverages-treats'; selectedCategory = 'beverages-treats'; fetchProducts()" :class="activeCategory === 'beverages-treats' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Beverages & Treats</button>
+                <button @click="activeCategory = 'sides-addons'; selectedCategory = 'sides-addons'; fetchProducts()" :class="activeCategory === 'sides-addons' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">Sides & Add-Ons</button>
             </div>
 
             <!-- Search & Filter UI -->
@@ -1290,6 +1291,7 @@
                         <li><a href="#menu" class="hover:text-white transition-colors">Daily Affordable Meals</a></li>
                         <li><a href="#menu" class="hover:text-white transition-colors">Food Bowls</a></li>
                         <li><a href="#menu" class="hover:text-white transition-colors">Beverages & Treats</a></li>
+                        <li><a href="#menu" class="hover:text-white transition-colors">Sides & Add-Ons</a></li>
                         <li><a href="#catering" class="hover:text-white transition-colors">Catering Services</a></li>
                         <li><a href="#catering" class="hover:text-white transition-colors">Event Planning</a></li>
                         <li><a href="#catering" class="hover:text-white transition-colors">Corporate Events</a></li>

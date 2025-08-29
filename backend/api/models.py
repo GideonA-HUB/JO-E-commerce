@@ -23,6 +23,7 @@ class Product(models.Model):
         ('daily-meals', 'Daily Affordable Meals'),
         ('food-bowls', 'Food Bowls'),
         ('beverages-treats', 'Beverages & Treats'),
+        ('sides-addons', 'Sides & Add-Ons'),
     ]
     
     name = models.CharField(max_length=200)

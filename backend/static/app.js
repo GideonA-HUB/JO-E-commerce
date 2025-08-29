@@ -20,7 +20,8 @@ document.addEventListener('alpine:init', () => {
             { value: 'all', label: 'All' },
             { value: 'daily-meals', label: 'Daily Affordable Meals' },
             { value: 'food-bowls', label: 'Food Bowls' },
-            { value: 'beverages-treats', label: 'Beverages & Treats' }
+            { value: 'beverages-treats', label: 'Beverages & Treats' },
+            { value: 'sides-addons', label: 'Sides & Add-Ons' }
         ],
         
         siteSettings: siteSettings || {
