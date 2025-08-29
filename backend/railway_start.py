@@ -9,7 +9,7 @@ import django
 from django.core.management import execute_from_command_line
 
 # Set Django settings module for Railway
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.railway_settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
 def setup_environment():
     """Setup Railway environment variables"""
@@ -25,6 +25,13 @@ def setup_environment():
     if not os.environ.get('CORS_ALLOW_ALL_ORIGINS'):
         os.environ['CORS_ALLOW_ALL_ORIGINS'] = 'False'
     
+    # Ensure Railway domain is in allowed hosts
+    if not os.environ.get('ALLOWED_HOSTS'):
+        os.environ['ALLOWED_HOSTS'] = 'tasty-fingers.up.railway.app,localhost,127.0.0.1,0.0.0.0'
+    elif 'tasty-fingers.up.railway.app' not in os.environ.get('ALLOWED_HOSTS', ''):
+        current_hosts = os.environ.get('ALLOWED_HOSTS', '')
+        os.environ['ALLOWED_HOSTS'] = f"{current_hosts},tasty-fingers.up.railway.app"
+    
     print("✅ Environment variables set")
 
 def run_migrations():
@@ -35,7 +42,8 @@ def run_migrations():
         print("✅ Migrations completed successfully")
     except Exception as e:
         print(f"❌ Migration error: {e}")
-        sys.exit(1)
+        # Don't exit on migration error, continue with deployment
+        print("⚠️ Continuing with deployment despite migration error")
 
 def collect_static():
     """Collect static files"""
@@ -45,7 +53,8 @@ def collect_static():
         print("✅ Static files collected successfully")
     except Exception as e:
         print(f"❌ Static collection error: {e}")
-        sys.exit(1)
+        # Don't exit on static collection error, continue with deployment
+        print("⚠️ Continuing with deployment despite static collection error")
 
 def add_sample_data():
     """Add sample data if needed"""

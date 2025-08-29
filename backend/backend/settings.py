@@ -178,7 +178,7 @@ if not DEBUG:
         r'^/track-order/.*$',  # Exempt track-order from SSL redirect
     ]
     # Disable SSL redirect for Railway (Railway handles HTTPS)
-    SECURE_SSL_REDIRECT = False
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_PRELOAD = True
@@ -188,7 +188,7 @@ if not DEBUG:
     SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
     
     # Disable CORS for all origins in production
-    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False').lower() == 'true'
 else:
     # Development settings
     CORS_ALLOW_ALL_ORIGINS = True
